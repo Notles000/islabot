@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ISLA Santarém — Portal do Docente</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=3" />
+  <script>if(localStorage.getItem('darkMode')==='1')document.documentElement.setAttribute('data-dark','1');</script>
+  <script src="assets/js/jobs.js?v=3"></script>
+  <style>
+    /* ── Topic tree ── */
+    .topic-list { display:flex; flex-direction:column; gap:8px; padding:16px; }
+    .topic-card {
+      border:1px solid var(--border);
+      border-radius:8px;
+      overflow:hidden;
+      background:var(--surface-1);
+      transition:border-color .15s;
+    }
+    .topic-card:hover { border-color:var(--accent); }
+    .topic-card-head {
+      display:flex; align-items:center; gap:8px;
+      padding:10px 12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .topic-card-head:hover { background:var(--hover-bg); }
+    .topic-chevron {
+      flex-shrink:0; color:var(--text-3);
+      transition:transform .18s;
+      font-size:11px;
+    }
+    .topic-card.open .topic-chevron { transform:rotate(90deg); }
+    .topic-num {
+      flex-shrink:0;
+      font-size:10px; font-weight:700;
+      color:var(--text-3);
+      min-width:18px;
+    }
+    .topic-name-input {
+      flex:1;
+      background:transparent;
+      border:none; border-bottom:1px solid transparent;
+      color:var(--text-1);
+      font-size:13px; font-weight:600;
+      padding:2px 4px;
+      outline:none;
+      transition:border-color .15s;
+    }
+    .topic-name-input:focus { border-bottom-color:var(--accent); }
+    .topic-del-btn {
+      flex-shrink:0;
+      background:none; border:none;
+      color:var(--text-3); cursor:pointer;
+      padding:3px 6px; border-radius:4px;
+      opacity:.55; transition:opacity .15s, color .15s;
+    }
+    .topic-del-btn:hover { opacity:1; color:#ef4444; }
+    .topic-card-body { display:none; padding:0 12px 12px; }
+    .topic-card.open .topic-card-body { display:block; }
+    .topic-content-area {
+      width:100%; box-sizing:border-box;
+      background:var(--surface-0);
+      border:1px solid var(--border);
+      border-radius:6px;
+      color:var(--text-1);
+      font-size:12px; line-height:1.6;
+      padding:10px 12px;
+      resize:vertical;
+      min-height:120px;
+      font-family:inherit;
+    }
+    .topic-content-area:focus {
+      outline:none; border-color:var(--accent);
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%,transparent);
+    }
+    .topic-list-footer {
+      display:flex; gap:8px; padding:0 16px 16px; flex-wrap:wrap;
+    }
+    .btn-add-topic {
+      display:flex; align-items:center; gap:6px;
+      background:none; border:1px dashed var(--border);
+      color:var(--text-2); cursor:pointer;
+      padding:7px 14px; border-radius:7px;
+      font-size:12.5px;
+      transition:border-color .15s, color .15s;
+    }
+    .btn-add-topic:hover { border-color:var(--accent); color:var(--accent); }
+    .topics-save-bar {
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:12px 16px;
+      border-top:1px solid var(--border);
+      background:var(--surface-1);
+    }
+    .topics-count { font-size:12px; color:var(--text-3); }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="assets/images/islasantarem-inverse.svg" alt="ISLA Santarém" />
+      </div>
+      <div class="sidebar-tagline">Portal do Docente</div>
+    </div>
+
+    <div class="history-scroll" id="courseScroll">
+      <div class="admin-section-label">As Minhas UCs</div>
+      <div id="courseList">
+        <div style="padding:12px 16px;font-size:12px;color:rgba(255,255,255,.35)">A carregar...</div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-profile">
+        <div class="avatar" id="userAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">...</div>
+          <div class="user-role">Docente</div>
+        </div>
+        <button onclick="logout()" title="Terminar sessão" class="logout-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/>
+          </svg>
+        </button>
+        <div class="topbar-brand">
+          <img src="assets/images/islasantarem.svg" alt="ISLA" class="topbar-logo" />
+        </div>
+        <span style="font-size:13px;font-weight:600;color:var(--text-2)">Portal do Docente</span>
+      </div>
+      <div class="topbar-right">
+        <a href="chat.html" class="topbar-btn" title="Ir para o chat">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>Chat</span>
+        </a>
+        <button class="topbar-btn" onclick="toggleDark()" title="Modo escuro">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content area -->
+    <div class="admin-content" id="contentArea">
+
+      <!-- Empty state -->
+      <div class="admin-empty" id="emptyState">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-3)">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        <div>Seleciona uma UC na barra lateral para gerir os seus documentos.</div>
+      </div>
+
+      <!-- Upload panel -->
+      <div id="uploadPanel" class="admin-panel" style="display:none">
+
+        <!-- Course title -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div class="hist-badge" id="panelCourseCode" style="font-size:13px;padding:4px 10px">--</div>
+          <h2 style="font-size:16px;font-weight:700;color:var(--text-1)" id="panelCourseName">UC</h2>
+        </div>
+        <p style="font-size:12.5px;color:var(--text-3);margin-bottom:4px">
+          Carrega um PDF — a IA organiza automaticamente o conteúdo em tópicos, que ficam disponíveis no chatbot com o teu nome como referência.
+        </p>
+
+        <!-- Upload card -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Carregar Documento
+          </div>
+
+          <div id="dropZone" class="drop-zone" onclick="document.getElementById('fileInput').click()"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="handleDrop(event)">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-3)">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <div class="drop-zone-text">
+              <span class="drop-zone-link">Clica aqui</span> ou arrasta um ficheiro PDF ou TXT
+            </div>
+            <div class="drop-zone-hint">Máx. 20 MB · PDF ou TXT</div>
+            <div class="dz-pipeline">
+              <div class="dz-step"><div class="dz-step-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>PDF/TXT</div>
+              <div class="dz-step-arrow">→</div>
+              <div class="dz-step dz-step-ai"><div class="dz-step-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div>IA Organiza</div>
+              <div class="dz-step-arrow">→</div>
+              <div class="dz-step"><div class="dz-step-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="17" x2="21" y2="17"/><line x1="17" y1="14" x2="17" y2="21"/></svg></div>Tópicos</div>
+              <div class="dz-step-arrow">→</div>
+              <div class="dz-step"><div class="dz-step-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>Chatbot</div>
+            </div>
+          </div>
+          <input type="file" id="fileInput" accept=".pdf,.txt" style="display:none" onchange="handleFileSelect(event)" />
+
+          <!-- Label + upload button -->
+          <div style="padding:0 16px 16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+            <div style="flex:1;min-width:160px">
+              <label class="form-label" for="docLabel">Nome do documento</label>
+              <input class="form-input" id="docLabel" type="text" placeholder="ex: FUC — Introdução à IA" />
+            </div>
+            <button class="btn-primary" id="uploadBtn" onclick="uploadFile()" disabled>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              </svg>
+              Carregar e Organizar
+            </button>
+          </div>
+
+          <!-- Upload progress -->
+          <div id="uploadProgress" style="display:none;padding:0 16px 16px">
+            <div class="extract-loading">
+              <div class="blob-container" id="blobContainer">
+                <div class="blob blob-1"></div>
+                <div class="blob blob-2"></div>
+                <div class="blob blob-3"></div>
+                <div class="blob-ring"></div>
+              </div>
+              <div class="extract-loading-text" id="progressText">A extrair e organizar com IA...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Topic tree preview card -->
+        <div class="admin-card" id="topicPreviewCard" style="display:none">
+          <div class="admin-card-header" style="justify-content:space-between">
+            <span style="display:flex;align-items:center;gap:6px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/><line x1="14" y1="17" x2="21" y2="17"/><line x1="17" y1="14" x2="17" y2="21"/>
+              </svg>
+              Tópicos identificados pela IA — revê e edita antes de guardar
+            </span>
+            <span id="topicCountBadge" class="hist-badge" style="font-size:11px">0 tópicos</span>
+          </div>
+
+          <p style="padding:0 16px;font-size:12px;color:var(--text-3);margin-bottom:4px">
+            Cada tópico será guardado como um bloco separado na base de conhecimento — o chatbot cita-te como fonte.
+            Podes renomear, editar o conteúdo, remover ou adicionar tópicos.
+          </p>
+
+          <!-- Dynamic topic list -->
+          <div id="topicList" class="topic-list"></div>
+
+          <div class="topic-list-footer">
+            <button class="btn-add-topic" onclick="addTopic()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Adicionar tópico manualmente
+            </button>
+          </div>
+
+          <div class="topics-save-bar">
+            <span class="topics-count" id="topicsSaveLabel">0 tópicos prontos a guardar</span>
+            <div style="display:flex;gap:8px">
+              <button class="btn-ghost" onclick="cancelPreview()">Cancelar</button>
+              <button class="btn-primary" id="saveTopicsBtn" onclick="saveTopics()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                  <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Guardar tópicos
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Existing documents card -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Documentos já carregados
+            <span class="result-hint" id="docsHint"></span>
+          </div>
+          <div id="docList" class="doc-list">
+            <div class="doc-empty">A carregar documentos...</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="admin-toast"></div>
+
+<script>
+'use strict';
+
+const TOKEN = localStorage.getItem('token');
+const USER  = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!TOKEN) { window.location.href = 'index.html'; }
+if (USER.role !== 'instructor' && USER.role !== 'admin') {
+  window.location.href = 'chat.html';
+}
+
+function authH() {
+  return { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  const nameEl = document.getElementById('userName');
+  if (nameEl) nameEl.textContent = USER.name || 'Docente';
+  const avatarEl = document.getElementById('userAvatar');
+  if (avatarEl && USER.name)
+    avatarEl.textContent = USER.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  loadCourses();
+});
+
+// ── Courses ───────────────────────────────────────────────────────────────────
+
+let _courses  = [];
+let _selected = null;
+
+async function loadCourses() {
+  try {
+    const res = await fetch('/api/admin/courses', { headers: authH() });
+    if (!res.ok) { showToast('Erro ao carregar UCs', true); return; }
+    _courses = await res.json();
+    renderCourseList();
+  } catch { showToast('Erro de ligação', true); }
+}
+
+function renderCourseList() {
+  const list = document.getElementById('courseList');
+  if (!_courses.length) {
+    list.innerHTML = '<div style="padding:12px 16px;font-size:12px;color:rgba(255,255,255,.35)">Sem UCs atribuídas. Contacta o administrador.</div>';
+    return;
+  }
+  list.innerHTML = _courses.map(c => `
+    <div class="admin-course-item" id="ci-${c.id}" onclick="selectCourse(${c.id})">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(c.name)}</span>
+      <span class="hist-badge">${escH(c.short_name || c.code)}</span>
+    </div>`).join('');
+  if (_courses.length === 1) selectCourse(_courses[0].id);
+}
+
+function selectCourse(courseId) {
+  _selected = _courses.find(c => c.id === courseId);
+  if (!_selected) return;
+  document.querySelectorAll('.admin-course-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById(`ci-${courseId}`);
+  if (el) el.classList.add('active');
+  document.getElementById('emptyState').style.display   = 'none';
+  document.getElementById('uploadPanel').style.display  = '';
+  document.getElementById('panelCourseCode').textContent = _selected.short_name || _selected.code;
+  document.getElementById('panelCourseName').textContent = _selected.name;
+  cancelPreview();
+  loadDocuments();
+}
+
+// ── File handling ─────────────────────────────────────────────────────────────
+
+let _pendingFile = null;
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  _pendingFile = file;
+  if (!document.getElementById('docLabel').value.trim())
+    document.getElementById('docLabel').value = file.name.replace(/\.[^.]+$/, '');
+  document.getElementById('uploadBtn').disabled = false;
+  document.getElementById('dropZone').querySelector('.drop-zone-text').innerHTML =
+    `<strong>${escH(file.name)}</strong> selecionado — clica em "Carregar e Organizar"`;
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  document.getElementById('fileInput').files = e.dataTransfer.files;
+  handleFileSelect({ target: { files: e.dataTransfer.files } });
+}
+
+async function uploadFile() {
+  if (!_pendingFile || !_selected) return;
+  const label = document.getElementById('docLabel').value.trim() || _pendingFile.name;
+
+  document.getElementById('uploadProgress').style.display    = '';
+  document.getElementById('uploadBtn').disabled              = true;
+  document.getElementById('topicPreviewCard').style.display  = 'none';
+  setProgressText('A extrair texto e organizar em tópicos com IA...');
+
+  const formData = new FormData();
+  formData.append('file', _pendingFile);
+  formData.append('doc_label', label);
+
+  try {
+    const res = await fetch('/api/admin/extract-topics', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${TOKEN}` },
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      showToast(err.detail || 'Erro na extracção', true);
+      document.getElementById('uploadProgress').style.display = 'none';
+      document.getElementById('uploadBtn').disabled = false;
+      return;
+    }
+    const data = await res.json();
+    document.getElementById('uploadProgress').style.display = 'none';
+    renderTopics(data.topics || []);
+    document.getElementById('topicPreviewCard').style.display = '';
+  } catch (err) {
+    showToast('Erro de ligação', true);
+    document.getElementById('uploadProgress').style.display = 'none';
+    document.getElementById('uploadBtn').disabled = false;
+  }
+}
+
+function setProgressText(msg) {
+  const el = document.getElementById('progressText');
+  if (el) el.textContent = msg;
+}
+
+// ── Topic tree ────────────────────────────────────────────────────────────────
+
+let _topics = [];   // [{name, content}]
+
+function renderTopics(topics) {
+  _topics = topics.map(t => ({ ...t }));
+  _rebuildTopicDom();
+}
+
+function _rebuildTopicDom() {
+  const list = document.getElementById('topicList');
+  if (!_topics.length) {
+    list.innerHTML = '<div class="doc-empty" style="padding:16px">Nenhum tópico encontrado. Adiciona um manualmente.</div>';
+    _updateTopicCount();
+    return;
+  }
+  list.innerHTML = _topics.map((t, i) => `
+    <div class="topic-card open" id="tc-${i}">
+      <div class="topic-card-head" onclick="toggleTopic(${i})">
+        <span class="topic-chevron">▶</span>
+        <span class="topic-num">${i + 1}.</span>
+        <input class="topic-name-input" id="tname-${i}"
+               value="${escH(t.name)}"
+               placeholder="Nome do tópico"
+               onclick="event.stopPropagation()"
+               oninput="_topics[${i}].name=this.value;_updateTopicCount()" />
+        <button class="topic-del-btn" onclick="event.stopPropagation();removeTopic(${i})" title="Remover tópico">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="topic-card-body">
+        <textarea class="topic-content-area" id="tcontent-${i}" rows="6"
+                  oninput="_topics[${i}].content=this.value">${escH(t.content)}</textarea>
+      </div>
+    </div>`).join('');
+  _updateTopicCount();
+}
+
+function toggleTopic(i) {
+  const card = document.getElementById(`tc-${i}`);
+  if (card) card.classList.toggle('open');
+}
+
+function removeTopic(i) {
+  _topics.splice(i, 1);
+  _rebuildTopicDom();
+}
+
+function addTopic() {
+  _topics.push({ name: `Tópico ${_topics.length + 1}`, content: '' });
+  _rebuildTopicDom();
+  // Auto-open new topic and focus name
+  const card = document.getElementById(`tc-${_topics.length - 1}`);
+  if (card) {
+    card.classList.add('open');
+    const inp = card.querySelector('.topic-name-input');
+    if (inp) { inp.focus(); inp.select(); }
+  }
+}
+
+function _updateTopicCount() {
+  const n = _topics.length;
+  const badge = document.getElementById('topicCountBadge');
+  const label = document.getElementById('topicsSaveLabel');
+  if (badge) badge.textContent = `${n} tópico${n !== 1 ? 's' : ''}`;
+  if (label) label.textContent = `${n} tópico${n !== 1 ? 's' : ''} prontos a guardar`;
+}
+
+async function saveTopics() {
+  if (!_selected) return;
+  // Sync textarea values back to _topics (in case DOM was not rebuilt after edit)
+  _topics.forEach((t, i) => {
+    const nameEl    = document.getElementById(`tname-${i}`);
+    const contentEl = document.getElementById(`tcontent-${i}`);
+    if (nameEl)    t.name    = nameEl.value.trim() || t.name;
+    if (contentEl) t.content = contentEl.value.trim();
+  });
+
+  const valid = _topics.filter(t => t.name && t.content);
+  if (!valid.length) { showToast('Nenhum tópico com conteúdo para guardar', true); return; }
+
+  const btn = document.getElementById('saveTopicsBtn');
+  btn.disabled   = true;
+  btn.textContent = 'A guardar...';
+
+  const body = {
+    doc_label:    document.getElementById('docLabel').value.trim() || 'Documento',
+    topics:       valid,
+    course_id:    _selected.id,
+    semester_id:  _selected.semester_id,
+    teacher_name: USER.name,
+  };
+
+  try {
+    const res = await fetch('/api/admin/save-topics', {
+      method: 'POST',
+      headers: authH(),
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) { showToast('Erro ao guardar', true); btn.disabled = false; btn.textContent = 'Guardar tópicos'; return; }
+    const data = await res.json();
+    showToast(`${data.topics_saved} tópico${data.topics_saved !== 1 ? 's' : ''} guardado${data.topics_saved !== 1 ? 's' : ''}!`);
+    cancelPreview();
+    loadDocuments();
+    // Reset upload form
+    _pendingFile = null;
+    document.getElementById('fileInput').value   = '';
+    document.getElementById('docLabel').value    = '';
+    document.getElementById('uploadBtn').disabled = true;
+    document.getElementById('dropZone').querySelector('.drop-zone-text').innerHTML =
+      '<span class="drop-zone-link">Clica aqui</span> ou arrasta um ficheiro PDF ou TXT';
+  } catch {
+    showToast('Erro de ligação', true);
+    btn.disabled = false;
+    btn.textContent = 'Guardar tópicos';
+  }
+}
+
+function cancelPreview() {
+  document.getElementById('topicPreviewCard').style.display = 'none';
+  document.getElementById('uploadProgress').style.display   = 'none';
+  document.getElementById('uploadBtn').disabled             = !_pendingFile;
+  _topics = [];
+  document.getElementById('topicList').innerHTML = '';
+}
+
+// ── Documents list ────────────────────────────────────────────────────────────
+
+async function loadDocuments() {
+  if (!_selected) return;
+  const list = document.getElementById('docList');
+  list.innerHTML = '<div class="doc-empty">A carregar...</div>';
+  try {
+    const url = `/api/admin/documents?course_id=${_selected.id}&semester_id=${_selected.semester_id}`;
+    const res = await fetch(url, { headers: authH() });
+    if (!res.ok) { list.innerHTML = '<div class="doc-empty" style="color:#ef4444">Erro ao carregar.</div>'; return; }
+    const docs = await res.json();
+    document.getElementById('docsHint').textContent = docs.length ? `${docs.length} bloco(s)` : '';
+    if (!docs.length) { list.innerHTML = '<div class="doc-empty">Nenhum documento carregado ainda.</div>'; return; }
+
+    // Group by base document name (before " — Tópico:")
+    const groups = {};
+    docs.forEach(d => {
+      const base = d.label.replace(/\s+—\s+Tópico:.+$/, '').replace(/\s+\[Docente:.+\]$/, '').trim();
+      if (!groups[base]) groups[base] = [];
+      groups[base].push(d);
+    });
+
+    list.innerHTML = Object.entries(groups).map(([base, items]) => `
+      <div style="margin-bottom:4px">
+        <div style="padding:8px 12px 4px;font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em">
+          ${escH(base)}
+          <span style="font-weight:400;opacity:.6;margin-left:6px">${items.length} tópico${items.length !== 1 ? 's' : ''}</span>
+        </div>
+        ${items.map(d => `
+          <div class="doc-row" style="padding-left:24px">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);flex-shrink:0;opacity:.7">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+            <div class="doc-row-label" title="${escH(d.label)}" style="font-size:12px">${escH(_topicName(d.label))}</div>
+            <div class="doc-row-date">${escH(d.added)}</div>
+            <button class="doc-delete-btn" onclick="deleteDoc(${JSON.stringify(d.label)})" title="Remover">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="m19 6-.867 12.142A2 2 0 0 1 16.138 20H7.862a2 2 0 0 1-1.995-1.858L5 6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              </svg>
+            </button>
+          </div>`).join('')}
+      </div>`).join('');
+  } catch { list.innerHTML = '<div class="doc-empty" style="color:#ef4444">Erro ao carregar.</div>'; }
+}
+
+function _topicName(label) {
+  const m = label.match(/—\s+Tópico:\s*(.+?)(\s+\[|$)/);
+  if (m) return m[1];
+  const m2 = label.match(/—\s+(.+?)(\s+\[|$)/);
+  if (m2) return m2[1];
+  return label;
+}
+
+async function deleteDoc(label) {
+  if (!confirm(`Remover "${label}" da base de conhecimento?`)) return;
+  try {
+    const res = await fetch(`/api/admin/documents/${encodeURIComponent(label)}`, {
+      method: 'DELETE', headers: authH(),
+    });
+    if (!res.ok) { showToast('Erro ao apagar', true); return; }
+    showToast('Bloco removido.');
+    loadDocuments();
+  } catch { showToast('Erro de ligação', true); }
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function toggleDark() {
+  const on = document.documentElement.getAttribute('data-dark') !== '1';
+  document.documentElement.setAttribute('data-dark', on ? '1' : '0');
+  localStorage.setItem('darkMode', on ? '1' : '0');
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.location.href = 'index.html';
+}
+
+let _toastTimer;
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'admin-toast admin-toast-visible' + (isError ? ' admin-toast-error' : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('admin-toast-visible'), 3000);
+}
+
+function escH(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

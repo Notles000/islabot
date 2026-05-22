@@ -1,0 +1,3355 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ISLA Santarém — Painel de Gestão</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=3" />
+  <script>if(localStorage.getItem('darkMode')==='1')document.documentElement.setAttribute('data-dark','1');</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="assets/js/jobs.js?v=3"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="assets/images/islasantarem-inverse.svg" alt="ISLA Santarém" />
+      </div>
+      <div class="sidebar-tagline">Painel de Gestão</div>
+    </div>
+
+    <div class="history-scroll" id="courseScroll">
+
+      <!-- Gestão -->
+      <div class="admin-section-label">Gestão</div>
+      <div id="gestaoItem" class="admin-course-item" onclick="selectGestao()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+        </svg>
+        Gestão
+      </div>
+
+      <!-- Histórico -->
+      <div class="admin-section-label" style="margin-top:8px">Análise</div>
+      <div id="historyItem" class="admin-course-item" onclick="selectHistory()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Histórico de Chats
+      </div>
+      <div id="usageItem" class="admin-course-item" onclick="selectUsage()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        Utilização & Limites
+      </div>
+
+      <!-- Hidden items kept for JS compatibility -->
+      <div id="dashItem" style="display:none" class="admin-course-item" onclick="selectDash()">Dashboard</div>
+      <div id="usersItem" style="display:none" class="admin-course-item" onclick="selectUsers()">Utilizadores</div>
+      <div id="coursesItem" style="display:none" class="admin-course-item" onclick="selectCourses()">Cursos</div>
+      <div id="semestersItem" style="display:none" class="admin-course-item" onclick="selectSemesters()">Semestres</div>
+      <div id="insightsItem" style="display:none" class="admin-course-item" onclick="selectInsights()">Insights</div>
+      <div id="liveFeedItem" style="display:none" class="admin-course-item" onclick="selectLiveFeed()">Feed</div>
+      <div id="aiSettingsItem" style="display:none" class="admin-course-item" onclick="selectAISettings()">Config IA</div>
+      <div id="kbItem" style="display:none" class="admin-course-item" onclick="selectKB()">Base de Conhecimento</div>
+      <div id="navLabelGestao" style="display:none"></div>
+      <div id="navLabelAnalise" style="display:none"></div>
+      <div id="navLabelSistema" style="display:none"></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div style="padding:8px 14px;border-bottom:1px solid var(--sidebar-sep)">
+        <button onclick="toggleAdminDark()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px;padding:4px 0;width:100%">
+          <svg id="adminDarkIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <span id="adminDarkLabel">Modo escuro</span>
+        </button>
+      </div>
+      <div class="user-profile">
+        <div class="avatar" id="userAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">...</div>
+          <div class="user-role" id="userRoleLabel">Admin</div>
+        </div>
+        <button onclick="logout()" title="Terminar sessão" class="logout-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/>
+          </svg>
+        </button>
+        <div class="topbar-brand">
+          <img src="assets/images/islasantarem.svg" alt="ISLA" class="topbar-logo" />
+        </div>
+        <div class="active-course-badge" id="activeBadge">
+          <span class="badge-dot"></span>
+          <span id="activeCourseLabel">Dashboard</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <a href="chat.html" class="topbar-btn" title="Ir para o chat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </a>
+      </div>
+    </header>
+
+    <div class="admin-content" id="adminContent">
+
+      <!-- Empty state (hidden by default now) -->
+      <div class="admin-empty" id="adminEmpty" style="display:none">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.25">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <p>Seleciona uma secção no menu lateral</p>
+      </div>
+
+      <!-- ── Knowledge Base panel ── -->
+      <div class="admin-panel" id="kbPanel" style="display:none">
+
+        <div class="courses-toolbar">
+          <div class="courses-toolbar-left">
+            <div class="courses-search-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input id="kbFilterInput" type="search" placeholder="Pesquisar cursos…" oninput="filterKBGrid()" />
+            </div>
+            <div class="sem-filter-pills" id="kbSemPills"></div>
+          </div>
+          <button class="btn-primary btn-sm" id="kbNewCourseBtn" onclick="openKBCourseModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo curso
+          </button>
+        </div>
+
+        <div id="kbCoursesGrid" class="courses-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">A carregar...</div>
+        </div>
+
+      </div><!-- /kbPanel -->
+
+      <!-- ── Dashboard panel ── -->
+      <div class="admin-panel" id="dashPanel" style="display:none">
+
+        <div style="margin-bottom:24px;">
+          <h2 style="font-size:20px;font-weight:600;color:var(--text-1);margin-bottom:4px;">Visão Geral</h2>
+          <p style="color:var(--text-3);font-size:13px;margin:0;">Métricas principais do assistente académico e actividade recente.</p>
+        </div>
+
+        <div class="dash-stats-grid" id="dashStats" style="margin-bottom:24px; gap: 16px;">
+          <div class="dash-stat-card" style="padding: 16px; border-radius: 8px;">
+            <div class="dash-stat-icon" style="background:rgba(124,58,237,.1);color:#7c3aed; width: 36px; height: 36px; margin-bottom: 12px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <div class="dash-stat-label" style="margin-bottom: 4px;">Alunos</div>
+              <div class="dash-stat-value" id="ds-students" style="font-size: 24px;">—</div>
+            </div>
+          </div>
+          <div class="dash-stat-card" style="padding: 16px; border-radius: 8px;">
+            <div class="dash-stat-icon" style="background:rgba(16,185,129,.1);color:#10b981; width: 36px; height: 36px; margin-bottom: 12px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div>
+              <div class="dash-stat-label" style="margin-bottom: 4px;">Msgs Hoje</div>
+              <div class="dash-stat-value" id="ds-today" style="font-size: 24px;">—</div>
+            </div>
+          </div>
+          <div class="dash-stat-card" style="padding: 16px; border-radius: 8px;">
+            <div class="dash-stat-icon" style="background:rgba(59,130,246,.1);color:#3b82f6; width: 36px; height: 36px; margin-bottom: 12px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+              <div class="dash-stat-label" style="margin-bottom: 4px;">Msgs Semana</div>
+              <div class="dash-stat-value" id="ds-week" style="font-size: 24px;">—</div>
+            </div>
+          </div>
+          <div class="dash-stat-card" style="padding: 16px; border-radius: 8px;">
+            <div class="dash-stat-icon" style="background:rgba(245,158,11,.1);color:#f59e0b; width: 36px; height: 36px; margin-bottom: 12px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div>
+              <div class="dash-stat-label" style="margin-bottom: 4px;">Satisfação</div>
+              <div class="dash-stat-value" id="ds-rating" style="font-size: 24px;">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px; align-items: stretch;">
+
+          <!-- Left column -->
+          <div style="display:flex;flex-direction:column;gap:24px;">
+            
+            <!-- Activity chart -->
+            <div class="admin-card" style="flex:1;">
+              <div class="admin-card-header" style="border-bottom:none; padding-bottom:0;">
+                Actividade Recente (14 dias)
+                <span id="ds-active" style="margin-left:auto;font-size:12px;color:var(--text-3);font-weight:400">— alunos ativos</span>
+              </div>
+              <div style="padding:16px">
+                <canvas id="dailyChart" height="90"></canvas>
+              </div>
+            </div>
+
+            <div class="admin-card" style="flex:1;">
+              <div class="admin-card-header">
+                Atividade Recente (Últimas Mensagens)
+              </div>
+              <div id="dashActivity" style="padding:8px 16px;"></div>
+            </div>
+
+          </div>
+
+          <!-- Right column -->
+          <div style="display:flex;flex-direction:column;gap:24px;">
+            
+            <div class="admin-card" style="flex:1;">
+              <div class="admin-card-header">
+                UCs Mais Ativas (7 dias)
+              </div>
+              <div id="dashTopCourses" style="padding:8px 16px;"></div>
+            </div>
+
+          </div>
+
+        </div>
+      </div><!-- /dashPanel -->
+
+      <!-- ── Users panel ── -->
+      <div class="admin-panel" id="usersPanel" style="display:none">
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            Utilizadores
+            <button class="btn-primary btn-sm" onclick="openUserModal()" style="margin-left:auto">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Novo utilizador
+            </button>
+          </div>
+
+          <!-- Filter bar -->
+          <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input id="userSearch" type="search" placeholder="Pesquisar por nome ou email…"
+              oninput="filterUsers()"
+              style="flex:1;min-width:180px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;background:var(--bg-1);color:var(--text-1)" />
+            <select id="roleFilter" onchange="filterUsers()"
+              style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;background:var(--bg-1);color:var(--text-1)">
+              <option value="">Todos os papéis</option>
+              <option value="student">Aluno</option>
+              <option value="instructor">Docente</option>
+              <option value="secretaria">Secretaria</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <div style="overflow-x:auto">
+            <table class="usage-table" id="usersTable">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Papel</th>
+                  <th style="text-align:right">UCs</th>
+                  <th style="text-align:right">Mensagens</th>
+                  <th>Estado</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px">A carregar...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /usersPanel -->
+
+      <!-- ── Courses panel ── -->
+      <div class="admin-panel" id="coursesPanel" style="display:none">
+
+        <!-- Toolbar -->
+        <div class="courses-toolbar">
+          <div class="courses-toolbar-left">
+            <div class="courses-search-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input id="courseFilterInput" type="search" placeholder="Pesquisar cursos…" oninput="filterCoursesGrid()" />
+            </div>
+            <div class="sem-filter-pills" id="semFilterPills"></div>
+          </div>
+          <button class="btn-primary btn-sm" onclick="openCourseModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo curso
+          </button>
+        </div>
+
+        <!-- Course grid -->
+        <div id="coursesGrid" class="courses-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">A carregar...</div>
+        </div>
+
+        <!-- Enrollments panel -->
+        <div class="admin-card" id="enrollCard" style="display:none">
+          <div class="admin-card-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            Atribuições — <span id="enrollCourseName">—</span>
+            <button class="btn-ghost btn-sm" onclick="document.getElementById('enrollCard').style.display='none'" style="margin-left:auto">✕ Fechar</button>
+          </div>
+          
+          <div style="border-bottom: 1px solid var(--border); padding: 0 16px; display: flex; gap: 24px;">
+            <button id="tabAlunos" onclick="switchEnrollTab('alunos')" style="background:none; border:none; border-bottom: 2px solid var(--accent); color: var(--text-1); font-weight: 600; padding: 12px 0; cursor: pointer; font-size: 14px;">Alunos</button>
+            <button id="tabDocentes" onclick="switchEnrollTab('docentes')" style="background:none; border:none; border-bottom: 2px solid transparent; color: var(--text-3); font-weight: 500; padding: 12px 0; cursor: pointer; font-size: 14px;">Docentes</button>
+          </div>
+
+          <!-- Tab: Alunos -->
+          <div id="enrollAlunosSection">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+              <div style="flex:1;min-width:220px">
+                <label class="form-label">Adicionar aluno (email)</label>
+                <div style="display:flex;gap:6px">
+                  <input class="form-input" id="enrollEmail" placeholder="email@exemplo.pt" style="flex:1" onkeydown="if(event.key==='Enter')addEnrollment()" />
+                  <button class="btn-primary btn-sm" onclick="addEnrollment()">Adicionar</button>
+                </div>
+              </div>
+              <div style="flex:1;min-width:220px">
+                <label class="form-label">Inscrição em massa (emails)</label>
+                <div style="display:flex;gap:6px">
+                  <textarea class="form-input" id="bulkEmails" rows="2" placeholder="email1@exemplo.pt&#10;email2@exemplo.pt" style="flex:1;resize:vertical"></textarea>
+                  <button class="btn-primary btn-sm" onclick="bulkEnroll()" style="align-self:flex-end">Inscrever</button>
+                </div>
+              </div>
+            </div>
+            <div id="enrollList" style="padding:8px 0"></div>
+          </div>
+
+          <!-- Tab: Docentes -->
+          <div id="enrollDocentesSection" style="display:none">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+              <div style="flex:1;min-width:220px">
+                <label class="form-label">Atribuir docente (email)</label>
+                <div style="display:flex;gap:6px">
+                  <input class="form-input" id="teachEmail" placeholder="docente@exemplo.pt" style="flex:1" onkeydown="if(event.key==='Enter')addInstructor()" />
+                  <button class="btn-primary btn-sm" onclick="addInstructor()">Atribuir</button>
+                </div>
+              </div>
+            </div>
+            <div id="teachList" style="padding:8px 0"></div>
+          </div>
+        </div>
+      </div><!-- /coursesPanel -->
+
+      <!-- ── Semesters panel ── -->
+      <div class="admin-panel" id="semestersPanel" style="display:none">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Semestres
+            <button class="btn-primary btn-sm" onclick="openSemModal()" style="margin-left:auto">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Novo semestre
+            </button>
+          </div>
+          <div id="semesterList" style="padding:8px 0"></div>
+        </div>
+      </div><!-- /semestersPanel -->
+
+      <!-- ── Chat history panel ── -->
+      <div class="admin-panel" id="historyPanel" style="display:none">
+        <div class="admin-card" style="flex:0 0 auto">
+          <div class="admin-card-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Histórico de Conversas
+            <button class="btn-ghost btn-sm" onclick="loadHistorySessions()" style="margin-left:auto">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.5"/></svg>
+              Atualizar
+            </button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="usage-table" id="historyTable">
+              <thead><tr><th>Utilizador</th><th>UC</th><th>Título</th><th style="text-align:right">Msgs</th><th>Data</th><th></th></tr></thead>
+              <tbody id="historyTableBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-3)">A carregar...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="admin-card" id="historyConvCard" style="display:none">
+          <div class="admin-card-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span id="historyConvTitle">Conversa</span>
+            <button class="btn-ghost btn-sm" onclick="document.getElementById('historyConvCard').style.display='none'" style="margin-left:auto">✕</button>
+          </div>
+          <div id="historyConvBody" style="padding:8px 0;max-height:500px;overflow-y:auto"></div>
+        </div>
+      </div><!-- /historyPanel -->
+
+      <!-- ── Insights panel ── -->
+      <div class="admin-panel" id="insightsPanel" style="display:none">
+        <div class="dash-stats-grid" style="margin-bottom:0">
+          <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background:rgba(239,68,68,.1);color:#ef4444">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div><div class="dash-stat-value" id="ins-failed">—</div><div class="dash-stat-label">Perguntas sem resposta</div></div>
+          </div>
+          <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background:rgba(245,158,11,.1);color:#f59e0b">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3z"/></svg>
+            </div>
+            <div><div class="dash-stat-value" id="ins-low">—</div><div class="dash-stat-label">Avaliações negativas</div></div>
+          </div>
+          <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background:rgba(16,185,129,.1);color:#10b981">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"/></svg>
+            </div>
+            <div><div class="dash-stat-value" id="ins-up">—</div><div class="dash-stat-label">Avaliações positivas</div></div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Perguntas sem resposta — adiciona estes tópicos à base de conhecimento
+          </div>
+          <div id="insFailedList" style="padding:8px 0"></div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3z"/></svg>
+            Respostas mal avaliadas
+          </div>
+          <div id="insLowList" style="padding:8px 0"></div>
+        </div>
+      </div><!-- /insightsPanel -->
+
+      <!-- ── AI Settings panel ── -->
+      <div class="admin-panel" id="aiSettingsPanel" style="display:none">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+            Configurações do Modelo IA
+          </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;gap:14px">
+            <div>
+              <label class="form-label">Modelo Ollama</label>
+              <input class="form-input" id="aiModel" placeholder="qwen3.5:0.8b" />
+              <div style="font-size:11px;color:var(--text-3);margin-top:4px">Nome do modelo instalado no Ollama (ex: qwen3.5:0.8b, llama3.2:3b)</div>
+            </div>
+            <div>
+              <label class="form-label">Temperatura <span id="tempVal" style="font-weight:400;color:var(--accent)">1.0</span></label>
+              <input type="range" id="aiTemp" min="0" max="2" step="0.1" value="1.0"
+                oninput="document.getElementById('tempVal').textContent = parseFloat(this.value).toFixed(1)"
+                style="width:100%;accent-color:var(--accent)" />
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-3)"><span>0 — mais focado</span><span>2 — mais criativo</span></div>
+            </div>
+            <div>
+              <label class="form-label">System Prompt personalizado <span style="font-weight:400;opacity:.6">(deixa em branco para usar o padrão)</span></label>
+              <textarea class="form-input" id="aiSystemPrompt" rows="8" placeholder="És um assistente académico..." style="resize:vertical;font-family:monospace;font-size:12px"></textarea>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-primary" onclick="saveAISettings()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Guardar configurações
+              </button>
+              <button class="btn-ghost" onclick="loadAISettings()">Repor valores guardados</button>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar Dados
+          </div>
+          <div style="padding:16px 20px;display:flex;gap:10px;flex-wrap:wrap">
+            <a class="btn-ghost" id="exportUsageBtn" href="#" onclick="exportCSV('usage',event)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exportar Utilização (CSV)
+            </a>
+            <a class="btn-ghost" id="exportSessionsBtn" href="#" onclick="exportCSV('sessions',event)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exportar Conversas (CSV)
+            </a>
+          </div>
+        </div>
+      </div><!-- /aiSettingsPanel -->
+
+      <!-- Live Feed panel -->
+      <div class="admin-panel" id="liveFeedPanel" style="display:none">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1.51 12.74A10.49 10.49 0 0 1 12 3a10.49 10.49 0 0 1 10.49 9.74"/>
+              <path d="M5 16.5A7 7 0 0 1 12 10a7 7 0 0 1 7 6.5"/>
+              <circle cx="12" cy="20" r="1" fill="currentColor"/>
+            </svg>
+            Feed em Direto — ISLA Santarém
+          </div>
+
+          <p style="font-size:13px;color:var(--text-3);margin:0 0 16px">
+            Obtém as notícias e eventos mais recentes do site da ISLA Santarém e adiciona-os automaticamente à base de conhecimento do chatbot.
+          </p>
+
+          <!-- Status card -->
+          <div class="feed-status-card" id="feedStatusCard">
+            <div class="feed-status-row">
+              <span class="feed-status-label">Última actualização</span>
+              <span class="feed-status-value" id="feedLastFetch">—</span>
+            </div>
+            <div class="feed-status-row">
+              <span class="feed-status-label">Itens na base de conhecimento</span>
+              <span class="feed-status-value" id="feedItemsCount">—</span>
+            </div>
+            <div class="feed-status-row" id="feedErrorRow" style="display:none">
+              <span class="feed-status-label" style="color:var(--danger)">Último erro</span>
+              <span class="feed-status-value" id="feedLastError" style="color:var(--danger)">—</span>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-primary" id="feedFetchBtn" onclick="runLiveFetch()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Actualizar Agora
+            </button>
+            <span class="feed-fetch-spinner" id="feedSpinner" style="display:none">
+              <span class="spinner-small"></span> A obter dados…
+            </span>
+          </div>
+        </div>
+
+        <!-- Results card -->
+        <div class="admin-card" id="feedResultsCard" style="display:none">
+          <div class="admin-card-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Itens Obtidos
+          </div>
+          <div id="feedItemsList"></div>
+        </div>
+      </div><!-- /liveFeedPanel -->
+
+
+      <!-- ── Gestão panel ── -->
+      <div class="admin-panel" id="gestaoPanel" style="display:none">
+
+        <!-- Wizard tabs -->
+        <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px;flex-wrap:wrap">
+          <button id="gTab1" onclick="switchGTab(1)" style="padding:10px 18px;border:none;background:none;font-size:13px;font-weight:600;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px;cursor:pointer">1. Cursos</button>
+          <span style="display:flex;align-items:center;color:var(--text-3);font-size:13px;padding:0 4px">›</span>
+          <button id="gTab2" onclick="switchGTab(2)" style="padding:10px 18px;border:none;background:none;font-size:13px;font-weight:500;color:var(--text-3);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer">2. Disciplinas (UCs)</button>
+          <span style="display:flex;align-items:center;color:var(--text-3);font-size:13px;padding:0 4px">›</span>
+          <button id="gTab3" onclick="switchGTab(3)" style="padding:10px 18px;border:none;background:none;font-size:13px;font-weight:500;color:var(--text-3);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer">3. Utilizadores</button>
+          <span style="display:flex;align-items:center;color:var(--text-3);font-size:13px;padding:0 4px">›</span>
+          <button id="gTab4" onclick="switchGTab(4)" style="padding:10px 18px;border:none;background:none;font-size:13px;font-weight:500;color:var(--text-3);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer">4. Atribuições</button>
+        </div>
+
+        <!-- Tab 1: Cursos -->
+        <div id="gSection1">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Cursos
+              <span style="font-size:11px;font-weight:400;color:var(--text-3);margin-left:6px">ex: TICS, Gestão, Informática</span>
+              <button class="btn-primary btn-sm" onclick="openGCourseModal()" style="margin-left:auto">+ Novo Curso</button>
+            </div>
+            <div style="padding:8px 16px;font-size:12px;color:var(--text-3);border-bottom:1px solid var(--border);background:var(--bg-2)">
+              📚 Cada <strong>Curso</strong> contém <strong>Disciplinas</strong> (ex: Matemática, Inglês, Informática). Cada disciplina tem tópicos carregados pelos professores.
+            </div>
+            <div id="gCourseList" style="padding:4px 0"><div style="padding:20px;text-align:center;color:var(--text-3)">A carregar...</div></div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Disciplinas -->
+        <div id="gSection2" style="display:none">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              Disciplinas
+              <span style="font-size:11px;font-weight:400;color:var(--text-3);margin-left:6px">ex: Matemática, Inglês, Excel — agrupadas por Curso</span>
+              <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+                <select id="gDisciplineCourseFilter" onchange="renderGDisciplines()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg-1);color:var(--text-1)">
+                  <option value="">Todos os cursos</option>
+                </select>
+                <button class="btn-primary btn-sm" onclick="openGDisciplineModal()">+ Nova Disciplina</button>
+              </div>
+            </div>
+            <div style="padding:8px 16px;font-size:12px;color:var(--text-3);border-bottom:1px solid var(--border);background:var(--bg-2)">
+              🎓 Disciplinas estão agrupadas pelo curso a que pertencem. Cada disciplina pode ter <strong>tópicos</strong> carregados pelos professores.
+            </div>
+            <div id="gDisciplineList" style="padding:8px 0"><div style="padding:20px;text-align:center;color:var(--text-3)">A carregar...</div></div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Utilizadores -->
+        <div id="gSection3" style="display:none">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              Utilizadores
+              <button class="btn-primary btn-sm" onclick="openUserModal()" style="margin-left:auto">+ Novo Utilizador</button>
+            </div>
+            <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <input id="gUserSearch" type="search" placeholder="Pesquisar..." oninput="filterGUsers()"
+                style="flex:1;min-width:180px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--bg-1);color:var(--text-1)"/>
+              <select id="gRoleFilter" onchange="filterGUsers()"
+                style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--bg-1);color:var(--text-1)">
+                <option value="">Todos os papéis</option>
+                <option value="student">Aluno</option>
+                <option value="instructor">Docente</option>
+                <option value="secretaria">Secretaria</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="usage-table" id="gUsersTable">
+                <thead><tr><th>Nome</th><th>Papel</th><th style="text-align:right">UCs</th><th style="text-align:right">Msgs</th><th>Estado</th><th></th></tr></thead>
+                <tbody id="gUsersTableBody"><tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px">A carregar...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Atribuições -->
+        <div id="gSection4" style="display:none">
+          <!-- Assign Professors to Courses -->
+          <div class="admin-card" style="margin-bottom:20px">
+            <div class="admin-card-header">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Atribuir Docentes às Disciplinas
+              <span style="margin-left:8px;font-size:11px;color:var(--text-3);font-weight:400">Seleciona uma disciplina e atribui um docente</span>
+            </div>
+            <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+              <div style="flex:1;min-width:200px">
+                <label class="form-label">Disciplina (UC)</label>
+                <select class="form-input" id="asgCourseSelect" onchange="loadAsgInstructors()">
+                  <option value="">— Seleciona uma UC —</option>
+                </select>
+              </div>
+              <div style="flex:1;min-width:200px">
+                <label class="form-label">Docente (email)</label>
+                <div style="display:flex;gap:6px">
+                  <input class="form-input" id="asgInstructorEmail" placeholder="docente@exemplo.pt" style="flex:1" />
+                  <button class="btn-primary btn-sm" onclick="assignInstructor()">Atribuir</button>
+                </div>
+              </div>
+            </div>
+            <div id="asgInstructorList" style="padding:8px 0"><div style="padding:16px;color:var(--text-3);font-size:13px">Seleciona uma UC para ver os docentes atribuídos.</div></div>
+          </div>
+
+          <!-- Enroll Students in Courses -->
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              Inscrever Alunos em Disciplinas
+              <span style="margin-left:8px;font-size:11px;color:var(--text-3);font-weight:400">Seleciona uma disciplina e inscreve alunos</span>
+            </div>
+            <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+              <div style="flex:1;min-width:200px">
+                <label class="form-label">Disciplina (UC)</label>
+                <select class="form-input" id="asgEnrollCourseSelect" onchange="loadAsgEnrollments()">
+                  <option value="">— Seleciona uma UC —</option>
+                </select>
+              </div>
+              <div style="flex:2;min-width:260px">
+                <label class="form-label">Inscrever aluno (email)</label>
+                <div style="display:flex;gap:6px">
+                  <input class="form-input" id="asgStudentEmail" placeholder="aluno@exemplo.pt" style="flex:1" />
+                  <button class="btn-primary btn-sm" onclick="assignStudent()">Inscrever</button>
+                </div>
+              </div>
+            </div>
+            <div style="padding:10px 16px;border-bottom:1px solid var(--border)">
+              <label class="form-label">Inscrição em massa (emails, um por linha)</label>
+              <div style="display:flex;gap:6px">
+                <textarea class="form-input" id="asgBulkEmails" rows="3" placeholder="email1@exemplo.pt&#10;email2@exemplo.pt" style="flex:1;resize:vertical"></textarea>
+                <button class="btn-primary btn-sm" onclick="assignBulkStudents()" style="align-self:flex-end">Inscrever Todos</button>
+              </div>
+            </div>
+            <div id="asgEnrollList" style="padding:8px 0"><div style="padding:16px;color:var(--text-3);font-size:13px">Seleciona uma UC para ver os alunos inscritos.</div></div>
+          </div>
+        </div>
+
+      </div><!-- /gestaoPanel -->
+
+      <!-- Active panel -->
+      <div class="admin-panel" id="adminPanel" style="display:none">
+
+        <!-- Breadcrumb back to KB -->
+        <div class="kb-breadcrumb">
+          <button class="kb-back-btn" onclick="selectKB()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Base de Conhecimento
+          </button>
+          <span class="kb-breadcrumb-sep">/</span>
+          <span class="kb-breadcrumb-current" id="kbBreadcrumbLabel">—</span>
+        </div>
+
+        <!-- Upload card -->
+        <div class="admin-card" id="uploadCard">
+          <div class="admin-card-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Carregar Documentos
+          </div>
+
+          <!-- Drop zone -->
+          <div
+            class="drop-zone"
+            id="dropZone"
+            onclick="document.getElementById('fileInput').click()"
+            ondragover="onDragOver(event)"
+            ondragleave="onDragLeave(event)"
+            ondrop="onDrop(event)"
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.35">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <polyline points="8 13 12 9 16 13"/><line x1="12" y1="9" x2="12" y2="17"/>
+            </svg>
+            <span class="drop-zone-text">Arrasta um PDF aqui ou <span class="drop-zone-link">clica para seleccionar</span></span>
+
+            <!-- AI pipeline preview (shown before upload) -->
+            <div class="dz-pipeline">
+              <div class="dz-step">
+                <div class="dz-step-icon">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/><rect x="2" y="15" width="20" height="6" rx="1"/></svg>
+                </div>
+                <span>Upload</span>
+              </div>
+              <div class="dz-step-arrow">→</div>
+              <div class="dz-step">
+                <div class="dz-step-icon">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+                </div>
+                <span>Extração</span>
+              </div>
+              <div class="dz-step-arrow">→</div>
+              <div class="dz-step dz-step-ai">
+                <div class="dz-step-icon">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                </div>
+                <span>Organização com IA</span>
+              </div>
+            </div>
+
+            <span class="drop-zone-hint">PDF, TXT · vários ficheiros processados sequencialmente</span>
+            <input type="file" id="fileInput" accept=".pdf,.txt" multiple style="display:none" onchange="handleFileInput(event)" />
+          </div>
+
+          <!-- Blob loading state -->
+          <div class="extract-loading" id="extractLoading" style="display:none">
+            <div class="blob-container">
+              <div class="blob blob-1"></div>
+              <div class="blob blob-2"></div>
+              <div class="blob blob-3"></div>
+              <div class="blob-ring"></div>
+            </div>
+            <!-- Step indicator (single file mode) -->
+            <div id="uploadSteps" style="display:none;flex-direction:column;gap:6px;margin:12px 0 4px;width:100%;max-width:340px">
+              <div class="upload-step" id="step1">
+                <span class="step-icon">⏳</span>
+                <span class="step-label">Upload do PDF</span>
+              </div>
+              <div class="upload-step" id="step2" style="opacity:.4">
+                <span class="step-icon">⏳</span>
+                <span class="step-label">Extração de texto</span>
+              </div>
+              <div class="upload-step" id="step3" style="opacity:.4">
+                <span class="step-icon">⏳</span>
+                <span class="step-label">Limpeza e organização com IA</span>
+              </div>
+            </div>
+            <div class="queue-progress-wrap" id="queueProgressWrap" style="display:none">
+              <div class="queue-file-label" id="queueFileLabel">A processar...</div>
+              <div class="queue-bar-track">
+                <div class="queue-bar-fill" id="queueBarFill" style="width:0%"></div>
+              </div>
+              <div class="queue-counter" id="queueCounter">0 / 0</div>
+            </div>
+            <p class="extract-loading-text" id="extractLoadingText">A preparar...</p>
+          </div>
+        </div>
+
+        <!-- Documents in knowledge base -->
+        <div class="admin-card" id="documentsCard">
+          <div class="admin-card-header" style="cursor:pointer" onclick="toggleDocuments()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Documentos Carregados
+            <span class="knowledge-size" id="docCount">—</span>
+            <svg id="docsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:auto;transition:transform .2s">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div id="documentsBody" style="display:none">
+            <div class="doc-list" id="docList">
+              <div class="doc-empty">Nenhum documento encontrado.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Knowledge base viewer -->
+        <div class="admin-card" id="knowledgeCard">
+          <div class="admin-card-header" style="cursor:pointer" onclick="toggleKnowledge()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            Base de Conhecimento
+            <span class="knowledge-size" id="knowledgeSize">0 caracteres</span>
+            <svg id="knowledgeChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:auto;transition:transform .2s">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="knowledge-body" id="knowledgeBody" style="display:none">
+
+            <!-- Toolbar -->
+            <div class="knowledge-toolbar">
+              <button class="btn-ghost btn-sm" id="editKbBtn" onclick="enableKbEdit()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Editar conteúdo completo
+              </button>
+              <button class="btn-ghost btn-sm btn-danger" onclick="clearKnowledge()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  <path d="M10 11v6"/><path d="M14 11v6"/>
+                </svg>
+                Limpar tudo
+              </button>
+              <!-- Pagination (viewer mode) -->
+              <div class="kb-pagination" id="kbPagination" style="display:none;margin-left:auto">
+                <button class="btn-ghost btn-sm" id="kbPrevBtn" onclick="kbChangePage(-1)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <span id="kbPageLabel" style="font-size:12px;color:var(--text-3);padding:0 6px"></span>
+                <button class="btn-ghost btn-sm" id="kbNextBtn" onclick="kbChangePage(1)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Read-only viewer (paginated) -->
+            <div id="kbViewerWrap">
+              <div id="kbViewerLoading" style="display:none;padding:24px;text-align:center;color:var(--text-3);font-size:13px">A carregar...</div>
+              <pre class="knowledge-viewer" id="kbViewer"></pre>
+            </div>
+
+            <!-- Edit textarea (only visible in edit mode) -->
+            <div id="kbEditorWrap" style="display:none">
+              <textarea class="knowledge-editor" id="kbTextarea" rows="28" spellcheck="false"
+                placeholder="Ainda sem conteúdo. Carrega documentos para começar."></textarea>
+              <div class="admin-actions" id="kbSaveBar">
+                <button class="btn-primary" onclick="saveKbEdit()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                  Guardar edição
+                </button>
+                <button class="btn-ghost" onclick="cancelKbEdit()">Cancelar</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /admin-panel -->
+
+      <!-- Usage & Limits panel -->
+      <div class="admin-panel" id="usagePanel" style="display:none">
+
+        <!-- Rate limit card -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Limite de Mensagens por Hora
+          </div>
+          <div style="padding:16px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <input type="number" id="rateLimitInput" min="0" step="1" value="0"
+              style="width:90px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px;background:var(--bg-1);color:var(--text-1)"
+              placeholder="0" />
+            <span style="font-size:13px;color:var(--text-3)">mensagens/hora por aluno <em style="font-style:normal;opacity:.7">(0 = sem limite)</em></span>
+            <button class="btn-primary btn-sm" onclick="saveRateLimit()" style="margin-left:auto">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Guardar
+            </button>
+          </div>
+        </div>
+
+        <!-- Usage table card -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Utilização por Aluno
+            <button class="btn-ghost btn-sm" onclick="loadUsage()" style="margin-left:auto">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.5"/>
+              </svg>
+              Atualizar
+            </button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="usage-table" id="usageTable">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th style="text-align:right">Última hora</th>
+                  <th style="text-align:right">Últimas 24h</th>
+                  <th style="text-align:right">7 dias</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="usageTableBody">
+                <tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:20px">A carregar...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /usagePanel -->
+
+    </div><!-- /admin-content -->
+
+    <div class="admin-toast" id="adminToast"></div>
+  </main>
+</div>
+
+
+<!-- ── Program Modal ── -->
+<div class="modal-backdrop" id="programModalBackdrop" style="display:none" onclick="closeProgramModal()"></div>
+<div class="modal" id="programModal" style="display:none">
+  <div class="modal-header">
+    <span id="programModalTitle">Novo Curso</span>
+    <button class="modal-close" onclick="closeProgramModal()">✕</button>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="editProgramId" />
+    <label class="form-label">Nome do Curso / Programa</label>
+    <input class="form-input" id="editProgramName" type="text" placeholder="Ex: Licenciatura em Informática" />
+  </div>
+  <div class="modal-footer">
+    <button class="btn-ghost" onclick="closeProgramModal()">Cancelar</button>
+    <button class="btn-primary" onclick="saveProgram()">Guardar</button>
+  </div>
+</div>
+
+<!-- ── User modal ── -->
+<div class="modal-backdrop" id="userModalBackdrop" style="display:none" onclick="closeUserModal()"></div>
+<div class="modal" id="userModal" style="display:none">
+  <div class="modal-header">
+    <span id="userModalTitle">Novo Utilizador</span>
+    <button class="modal-close" onclick="closeUserModal()">✕</button>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="editUserId" />
+    <label class="form-label">Nome</label>
+    <input class="form-input" id="editName" type="text" placeholder="Nome completo" />
+    <label class="form-label" style="margin-top:12px">Email</label>
+    <input class="form-input" id="editEmail" type="email" placeholder="email@exemplo.pt" />
+    <label class="form-label" style="margin-top:12px">Papel</label>
+    <select class="form-input" id="editRole">
+      <option value="student">Aluno</option>
+      <option value="instructor">Docente</option>
+      <option value="secretaria">Secretaria</option>
+      <option value="admin">Administrador</option>
+    </select>
+    <label class="form-label" style="margin-top:12px">Password <span id="pwdHint" style="font-weight:400;opacity:.6">(deixa em branco para não alterar)</span></label>
+    <input class="form-input" id="editPassword" type="password" placeholder="Nova password" autocomplete="new-password" />
+  </div>
+  <div class="modal-footer">
+    <button class="btn-ghost" onclick="closeUserModal()">Cancelar</button>
+    <button class="btn-primary" onclick="saveUser()">Guardar</button>
+  </div>
+</div>
+
+<script>
+// API is already defined by jobs.js (loaded in <head>)
+const token      = localStorage.getItem('token');
+const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+let activeCourse = null;   // course object or null (= general)
+let kbOriginal   = '';
+let coursesMap   = {};     // id → course object (avoids serialising into onclick)
+let isGeneral    = false;
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+
+async function init() {
+  if (!token || !storedUser.role) { location.href = 'index.html'; return; }
+  if (!['admin','instructor'].includes(storedUser.role)) {
+    location.href = 'chat.html'; return;
+  }
+  document.getElementById('userName').textContent      = storedUser.name || '';
+  document.getElementById('userAvatar').textContent    = (storedUser.name || '?')[0].toUpperCase();
+  document.getElementById('userRoleLabel').textContent =
+    storedUser.role === 'admin' ? 'Administrador' : 'Docente';
+
+  // Instructors: hide admin-only sidebar items
+  if (storedUser.role === 'instructor') {
+    ['gestaoItem','historyItem','usageItem']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  }
+
+  await loadCourses();
+  _maybeRestoreJob();
+  if (!new URLSearchParams(location.search).get('job')) {
+    if (storedUser.role === 'instructor') {
+      selectKB();
+    } else {
+      selectGestao();
+    }
+  }
+}
+
+async function _maybeRestoreJob() {
+  const params = new URLSearchParams(location.search);
+  const job_id = params.get('job');
+  if (!job_id) return;
+
+  history.replaceState(null, '', 'admin.html');
+
+  const result = jobsConsumeResult(job_id);
+  if (!result) { showToast('Resultado não encontrado ou já utilizado.', 'error'); return; }
+
+  // Restore the active course context if stored
+  if (result.course_id) {
+    const c = coursesMap[result.course_id];
+    if (c) { activeCourse = c; isGeneral = false; setActiveItem('kbItem'); document.getElementById('kbBreadcrumbLabel').textContent = c.short_name || c.code || c.name; }
+  } else {
+    activeCourse = null; isGeneral = true; setActiveItem('kbItem'); document.getElementById('kbBreadcrumbLabel').textContent = 'Documentos Gerais';
+  }
+
+  showPanel();
+
+  // Auto-save the organized content
+  const label   = (result.filename || result.doc_label || 'documento').replace(/\.[^.]+$/, '');
+  const content = result.organized || '';
+  if (!content) { showToast('Resultado vazio — documento ignorado.', 'error'); return; }
+
+  try {
+    const data = await apiFetch('/admin/save', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        content,
+        doc_label:   label,
+        course_id:   result.course_id   ?? null,
+        semester_id: result.semester_id ?? null,
+      }),
+    });
+    await loadKnowledgeContent();
+    showToast(`"${label}" guardado automaticamente. Base de conhecimento: ${formatSize(data.total_chars)}`);
+  } catch (err) {
+    showToast('Erro ao guardar resultado: ' + err.message, 'error');
+  }
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  location.href = 'index.html';
+}
+
+// ── Dark mode ─────────────────────────────────────────────────────────────────
+
+function applyAdminDark(on) {
+  document.body.classList.toggle('dark', on);
+  document.documentElement.setAttribute('data-dark', on ? '1' : '0');
+  localStorage.setItem('darkMode', on ? '1' : '0');
+  const lbl = document.getElementById('adminDarkLabel');
+  if (lbl) lbl.textContent = on ? 'Modo claro' : 'Modo escuro';
+}
+
+function toggleAdminDark() {
+  applyAdminDark(!document.body.classList.contains('dark'));
+}
+
+(function initDark() {
+  if (localStorage.getItem('darkMode') === '1') applyAdminDark(true);
+})();
+
+// ── API ───────────────────────────────────────────────────────────────────────
+
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: { 'Authorization': `Bearer ${token}`, ...(opts.headers || {}) },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('visible');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('visible');
+}
+
+// ── Course list ───────────────────────────────────────────────────────────────
+
+let _kbAllCourses = [];
+let _kbSemestersMap = {};
+let _kbFilterSem = null;
+let _kbFilterText = '';
+
+async function loadCourses() {
+  const [courses, semesters] = await Promise.all([
+    apiFetch('/admin/courses'),
+    apiFetch('/admin/semesters').catch(() => []),
+  ]);
+  _kbAllCourses = courses;
+  _kbSemestersMap = Object.fromEntries(semesters.map(s => [s.id, s.name]));
+  coursesMap = {};
+  courses.forEach(c => coursesMap[c.id] = c);
+}
+
+// ── Knowledge Base panel ──────────────────────────────────────────────────────
+
+function selectKB() {
+  setActiveItem('kbItem');
+  document.getElementById('activeCourseLabel').textContent = 'Base de Conhecimento';
+  hideAllPanels();
+  document.getElementById('kbPanel').style.display = 'flex';
+  closeSidebar();
+  loadKBPanel();
+}
+
+async function loadKBPanel() {
+  const grid = document.getElementById('kbCoursesGrid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">A carregar...</div>';
+  try {
+    const [courses, semesters, programs] = await Promise.all([
+      apiFetch('/admin/courses'),
+      apiFetch('/admin/semesters').catch(() => []),
+      apiFetch('/admin/programs').catch(() => []),
+    ]);
+    _allSemesters   = semesters;
+    _allCourses     = courses;
+    _allPrograms    = programs;
+    _kbAllCourses   = courses;
+    _kbSemestersMap = Object.fromEntries(semesters.map(s => [s.id, s.name]));
+    coursesMap = {};
+    courses.forEach(c => coursesMap[c.id] = c);
+    _kbFilterSem  = null;
+    _kbFilterText = '';
+    buildKBSemPills();
+    renderKBGrid();
+  } catch (err) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#ef4444;padding:40px">${escHtml(err.message)}</div>`;
+  }
+}
+
+function buildKBSemPills() {
+  const pills = document.getElementById('kbSemPills');
+  const sems  = _allSemesters.filter(s => _kbAllCourses.some(c => c.semester_id === s.id));
+  pills.innerHTML = [
+    `<button class="sem-pill ${_kbFilterSem === null ? 'active' : ''}" onclick="_setKBSem(null)">Todos</button>`,
+    ...sems.map(s => `<button class="sem-pill ${_kbFilterSem === s.id ? 'active' : ''}" onclick="_setKBSem(${s.id})">${escHtml(s.name)}</button>`),
+  ].join('');
+}
+
+function _setKBSem(semId) {
+  _kbFilterSem = semId;
+  buildKBSemPills();
+  renderKBGrid();
+}
+
+function filterKBGrid() {
+  _kbFilterText = (document.getElementById('kbFilterInput')?.value || '').toLowerCase();
+  renderKBGrid();
+}
+
+function renderKBGrid() {
+  const grid = document.getElementById('kbCoursesGrid');
+  let courses = _kbAllCourses;
+  if (_kbFilterSem !== null) courses = courses.filter(c => c.semester_id === _kbFilterSem);
+  if (_kbFilterText) courses = courses.filter(c =>
+    (c.code||'').toLowerCase().includes(_kbFilterText) ||
+    (c.name||'').toLowerCase().includes(_kbFilterText) ||
+    (c.short_name||'').toLowerCase().includes(_kbFilterText)
+  );
+
+  const isAdmin  = storedUser.role === 'admin';
+  const progMap  = Object.fromEntries((_allPrograms||[]).map(p => [p.id, p.name]));
+
+  // General docs card always first
+  const generalCard = `
+    <div class="course-card kb-general-card" onclick="selectGeneral()">
+      <div class="course-card-top">
+        <span class="course-card-code" style="background:rgba(16,185,129,.12);color:#10b981">GERAL</span>
+      </div>
+      <div class="course-card-name">Documentos Gerais ISLA</div>
+      <div class="course-card-short">Regulamentos, bolsas, informações institucionais</div>
+      <div class="course-card-open-hint">Clica para gerir →</div>
+    </div>`;
+
+  if (!courses.length && _kbFilterText === '' && _kbFilterSem === null) {
+    grid.innerHTML = generalCard + '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text-3)">Nenhuma disciplina criada ainda. Vai a <strong>Gestão → Cursos</strong> para começar.</div>';
+    return;
+  }
+
+  // Group by parent programme
+  const grouped = {};
+  const noGroup  = [];
+  courses.forEach(c => {
+    if (c.program_id && progMap[c.program_id]) {
+      if (!grouped[c.program_id]) grouped[c.program_id] = [];
+      grouped[c.program_id].push(c);
+    } else {
+      noGroup.push(c);
+    }
+  });
+
+  function courseCard(c) {
+    return `<div class="course-card" onclick="selectCourseById(${c.id})">
+      <div class="course-card-top">
+        <span class="course-card-code">${escHtml(c.code)}</span>
+        <div class="course-card-actions" onclick="event.stopPropagation()">
+          ${isAdmin ? `
+          <button class="btn-ghost btn-sm" onclick="openKBCourseModal(${c.id})" title="Editar">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-ghost btn-sm btn-danger" onclick="deleteKBCourse(${c.id},'${escHtml(c.name)}')" title="Eliminar">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>` : ''}
+        </div>
+      </div>
+      <div class="course-card-name">${escHtml(c.name)}</div>
+      ${c.short_name ? `<div class="course-card-short">${escHtml(c.short_name)}</div>` : ''}
+      <div class="course-card-sem">${escHtml(_kbSemestersMap[c.semester_id] || '—')}</div>
+      <div class="course-card-open-hint">Clica para gerir →</div>
+    </div>`;
+  }
+
+  function divider(label) {
+    return `<div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-top:12px;margin-bottom:2px">
+      <div style="height:1px;flex:0 0 10px;background:var(--border)"></div>
+      <span style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap">${escHtml(label)}</span>
+      <div style="height:1px;flex:1;background:var(--border)"></div>
+    </div>`;
+  }
+
+  let html = generalCard;
+  Object.entries(grouped).forEach(([pid, list]) => {
+    html += divider(progMap[pid]);
+    list.forEach(c => { html += courseCard(c); });
+  });
+  if (noGroup.length) {
+    html += divider('Sem Curso Associado');
+    noGroup.forEach(c => { html += courseCard(c); });
+  }
+  grid.innerHTML = html;
+}
+
+function openKBCourseModal(courseId) {
+  // Reuse the courses panel modal — ensure _allCourses/_allSemesters are populated
+  openCourseModal(courseId);
+  // After save, refresh KB panel instead of courses panel
+  _kbModalPendingSave = true;
+}
+
+let _kbModalPendingSave = false;
+
+async function deleteKBCourse(id, name) {
+  if (!confirm(`Eliminar "${name}"? Remove a UC, todas as inscrições e histórico de chat.`)) return;
+  try {
+    await apiFetch(`/admin/courses/${id}`, { method: 'DELETE' });
+    showToast(`"${name}" eliminado`);
+    loadKBPanel();
+    await loadCourses();
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+function selectCourseById(id) {
+  const c = coursesMap[id];
+  if (!c) return;
+  activeCourse = c;
+  isGeneral    = false;
+  setActiveItem('kbItem');
+  document.getElementById('activeCourseLabel').textContent = `${c.short_name || c.code} — ${c.name}`;
+  document.getElementById('kbBreadcrumbLabel').textContent = c.short_name || c.code || c.name;
+  _kbLoaded = false;
+  _kbPage   = 0;
+  showPanel();
+  loadKnowledgeContent();
+  document.getElementById('knowledgeBody').style.display  = 'none';
+  document.getElementById('knowledgeChevron').style.transform = '';
+  document.getElementById('documentsBody').style.display  = 'none';
+  document.getElementById('docsChevron').style.transform  = '';
+  document.getElementById('docCount').textContent = '—';
+  closeSidebar();
+}
+
+function selectGeneral() {
+  activeCourse = null;
+  isGeneral    = true;
+  setActiveItem('kbItem');
+  document.getElementById('activeCourseLabel').textContent = 'Documentos Gerais ISLA';
+  document.getElementById('kbBreadcrumbLabel').textContent = 'Documentos Gerais';
+  _kbLoaded = false;
+  _kbPage   = 0;
+  showPanel();
+  loadKnowledgeContent();
+  document.getElementById('knowledgeBody').style.display  = 'none';
+  document.getElementById('knowledgeChevron').style.transform = '';
+  document.getElementById('documentsBody').style.display  = 'none';
+  document.getElementById('docsChevron').style.transform  = '';
+  document.getElementById('docCount').textContent = '—';
+  closeSidebar();
+}
+
+function setActiveItem(id) {
+  document.querySelectorAll('.admin-course-item').forEach(el => el.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+}
+
+function hideAllPanels() {
+  ['adminEmpty','adminPanel','usagePanel','dashPanel','usersPanel',
+   'coursesPanel','semestersPanel','historyPanel','insightsPanel','aiSettingsPanel','liveFeedPanel','kbPanel','gestaoPanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
+function showPanel() {
+  hideAllPanels();
+  document.getElementById('adminPanel').style.display    = 'flex';
+  document.getElementById('extractLoading').style.display = 'none';
+  document.getElementById('dropZone').style.display      = 'flex';
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+
+function selectDash() {
+  setActiveItem('dashItem');
+  document.getElementById('activeCourseLabel').textContent = 'Dashboard';
+  hideAllPanels();
+  document.getElementById('dashPanel').style.display = 'flex';
+  closeSidebar();
+  loadDash();
+}
+
+let _dailyChart = null;
+
+async function loadDash() {
+  try {
+    const d = await apiFetch('/admin/stats');
+    document.getElementById('ds-students').textContent = d.total_students;
+    document.getElementById('ds-today').textContent    = d.msgs_today;
+    document.getElementById('ds-week').textContent     = d.msgs_week;
+    const rated = d.thumbs_up + d.thumbs_down;
+    document.getElementById('ds-rating').textContent   =
+      rated ? Math.round((d.thumbs_up / rated) * 100) + '%' : '—';
+    const activeEl = document.getElementById('ds-active');
+    if (activeEl) activeEl.textContent = `${d.active_students ?? '—'} alunos ativos`;
+
+    // Daily messages Chart.js line chart
+    if (d.daily_labels && typeof Chart !== 'undefined') {
+      const isDark = document.body.classList.contains('dark');
+      const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+      const tickColor = isDark ? '#64748b' : '#94a3b8';
+      if (_dailyChart) { _dailyChart.destroy(); _dailyChart = null; }
+      const ctx = document.getElementById('dailyChart').getContext('2d');
+      _dailyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: d.daily_labels,
+          datasets: [{
+            label: 'Mensagens',
+            data: d.daily_counts,
+            borderColor: '#0075C9',
+            backgroundColor: 'rgba(0,117,201,0.08)',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: '#0075C9',
+            fill: true,
+            tension: 0.35,
+          }],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } },
+            y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 }, stepSize: 1 }, beginAtZero: true },
+          },
+        },
+      });
+    }
+
+    // Top courses bar chart
+    const tc = document.getElementById('dashTopCourses');
+    if (!d.top_courses.length) {
+      tc.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">Sem dados ainda.</div>';
+    } else {
+      const max = Math.max(...d.top_courses.map(c => c.msgs), 1);
+      tc.innerHTML = d.top_courses.map(c => `
+        <div style="padding:6px 20px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;width:72px;flex-shrink:0;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(c.name)}</span>
+          <div style="flex:1;background:var(--bg-2);border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:${Math.round((c.msgs/max)*100)}%;background:var(--accent);height:100%;border-radius:4px;transition:width .4s"></div>
+          </div>
+          <span style="font-size:12px;color:var(--text-3);width:28px;text-align:right">${c.msgs}</span>
+        </div>`).join('');
+    }
+
+    // Recent activity
+    const ra = document.getElementById('dashActivity');
+    if (!d.recent_activity.length) {
+      ra.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">Sem atividade ainda.</div>';
+    } else {
+      ra.innerHTML = d.recent_activity.map(r => `
+        <div style="padding:8px 20px;border-bottom:1px solid var(--border);last-child:border:none">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="font-size:12px;font-weight:600;color:var(--text-1)">${escHtml(r.user)}</span>
+            <span style="font-size:11px;color:var(--text-3)">${_relTime(r.time)}</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(r.content)}</div>
+        </div>`).join('');
+    }
+  } catch (err) {
+    showToast('Erro ao carregar dashboard: ' + err.message, 'error');
+  }
+}
+
+function _relTime(iso) {
+  if (!iso) return '';
+  const diff = Math.floor((Date.now() - new Date(iso + 'Z').getTime()) / 1000);
+  if (diff < 60)   return 'agora mesmo';
+  if (diff < 3600) return Math.floor(diff/60) + ' min atrás';
+  if (diff < 86400)return Math.floor(diff/3600) + 'h atrás';
+  return Math.floor(diff/86400) + 'd atrás';
+}
+
+// ── Users ─────────────────────────────────────────────────────────────────────
+
+let _allUsers = [];
+
+function selectUsers() {
+  setActiveItem('usersItem');
+  document.getElementById('activeCourseLabel').textContent = 'Utilizadores';
+  hideAllPanels();
+  document.getElementById('usersPanel').style.display = 'flex';
+  closeSidebar();
+  loadUsers();
+}
+
+async function loadUsers() {
+  const tbody = document.getElementById('usersTableBody');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px">A carregar...</td></tr>';
+  try {
+    _allUsers = await apiFetch('/admin/users');
+    renderUsers(_allUsers);
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:24px">${escHtml(err.message)}</td></tr>`;
+  }
+}
+
+function filterUsers() {
+  const q    = document.getElementById('userSearch').value.toLowerCase();
+  const role = document.getElementById('roleFilter').value;
+  const filtered = _allUsers.filter(u =>
+    (!q    || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) &&
+    (!role || u.role === role)
+  );
+  renderUsers(filtered);
+}
+
+const ROLE_LABELS = { student: 'Aluno', instructor: 'Docente', secretaria: 'Secretaria', admin: 'Admin' };
+const ROLE_COLORS = { student: '#7c3aed', instructor: '#3b82f6', secretaria: '#10b981', admin: '#ef4444' };
+
+function renderUsers(users) {
+  const tbody = document.getElementById('usersTableBody');
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px">Nenhum utilizador encontrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--bg-2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;color:var(--accent)">${escHtml(u.name[0]?.toUpperCase()||'?')}</div>
+          <div>
+            <div style="font-weight:500;font-size:13px">${escHtml(u.name)}</div>
+            <div style="font-size:11px;color:var(--text-3)">${escHtml(u.email)}</div>
+          </div>
+        </div>
+      </td>
+      <td><span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:${ROLE_COLORS[u.role]}20;color:${ROLE_COLORS[u.role]}">${ROLE_LABELS[u.role]||u.role}</span></td>
+      <td style="text-align:right;color:var(--text-3);font-size:13px">${u.enrollments}</td>
+      <td style="text-align:right;color:var(--text-3);font-size:13px">${u.total_msgs}</td>
+      <td>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" ${u.is_active ? 'checked' : ''} onchange="toggleActive(${u.id}, this.checked)" style="cursor:pointer" />
+          <span style="font-size:12px;color:var(--text-3)">${u.is_active ? 'Ativo' : 'Inativo'}</span>
+        </label>
+      </td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn-ghost btn-sm" onclick="openUserModal(${u.id})" title="Editar">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="btn-ghost btn-sm btn-danger" onclick="deleteUser(${u.id}, '${escHtml(u.name)}')" title="Eliminar">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+async function toggleActive(userId, active) {
+  try {
+    await apiFetch(`/admin/users/${userId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_active: active }),
+    });
+    const u = _allUsers.find(x => x.id === userId);
+    if (u) u.is_active = active;
+    showToast(active ? 'Conta ativada' : 'Conta desativada');
+  } catch (err) {
+    showToast('Erro: ' + err.message, 'error');
+    loadUsers();
+  }
+}
+
+async function deleteUser(userId, name) {
+  if (!confirm(`Eliminar "${name}"? Esta ação apaga o utilizador e todo o histórico de chat.`)) return;
+  try {
+    await apiFetch(`/admin/users/${userId}`, { method: 'DELETE' });
+    showToast(`"${name}" eliminado.`);
+    loadUsers();
+  } catch (err) {
+    showToast('Erro: ' + err.message, 'error');
+  }
+}
+
+// ── User modal ────────────────────────────────────────────────────────────────
+
+function openUserModal(userId) {
+  const isEdit = userId != null;
+  document.getElementById('userModalTitle').textContent = isEdit ? 'Editar Utilizador' : 'Novo Utilizador';
+  document.getElementById('pwdHint').style.display      = isEdit ? '' : 'none';
+  document.getElementById('editUserId').value           = userId || '';
+  document.getElementById('editPassword').value         = '';
+
+  if (isEdit) {
+    const u = _allUsers.find(x => x.id === userId);
+    if (u) {
+      document.getElementById('editName').value  = u.name;
+      document.getElementById('editEmail').value = u.email;
+      document.getElementById('editRole').value  = u.role;
+    }
+  } else {
+    document.getElementById('editName').value  = '';
+    document.getElementById('editEmail').value = '';
+    document.getElementById('editRole').value  = 'student';
+  }
+
+  document.getElementById('userModalBackdrop').style.display = '';
+  document.getElementById('userModal').style.display         = '';
+  document.getElementById('editName').focus();
+}
+
+function closeUserModal() {
+  document.getElementById('userModalBackdrop').style.display = 'none';
+  document.getElementById('userModal').style.display         = 'none';
+}
+
+async function saveUser() {
+  const userId   = document.getElementById('editUserId').value;
+  const name     = document.getElementById('editName').value.trim();
+  const email    = document.getElementById('editEmail').value.trim();
+  const role     = document.getElementById('editRole').value;
+  const password = document.getElementById('editPassword').value;
+
+  if (!name || !email) { showToast('Nome e email são obrigatórios', 'error'); return; }
+
+  try {
+    if (userId) {
+      const body = { name, email, role };
+      if (password) body.password = password;
+      await apiFetch(`/admin/users/${userId}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      });
+      showToast('Utilizador atualizado');
+    } else {
+      if (!password) { showToast('Password obrigatória para novo utilizador', 'error'); return; }
+      await apiFetch('/admin/users', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, role, password }),
+      });
+      showToast('Utilizador criado');
+    }
+    closeUserModal();
+    loadUsers();
+  } catch (err) {
+    showToast('Erro: ' + (JSON.parse(err.message||'{}').detail || err.message), 'error');
+  }
+}
+
+// ── Courses ───────────────────────────────────────────────────────────────────
+
+let _allCourses = [], _allSemesters = [], _activeCourseId = null;
+
+function selectCourses() {
+  setActiveItem('coursesItem');
+  document.getElementById('activeCourseLabel').textContent = 'Cursos & Inscrições';
+  hideAllPanels();
+  document.getElementById('coursesPanel').style.display = 'flex';
+  closeSidebar();
+  loadCoursesPage();
+}
+
+let _courseFilterSem = null;
+let _courseFilterText = '';
+
+async function loadCoursesPage() {
+  const grid = document.getElementById('coursesGrid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">A carregar...</div>';
+  try {
+    [_allSemesters, _allCourses] = await Promise.all([
+      apiFetch('/admin/semesters'),
+      apiFetch('/admin/courses'),
+    ]);
+    _courseFilterSem  = null;
+    _courseFilterText = '';
+    buildSemFilterPills();
+    renderCoursesGrid();
+  } catch (err) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#ef4444;padding:40px">${escHtml(err.message)}</div>`;
+  }
+}
+
+function buildSemFilterPills() {
+  const pills = document.getElementById('semFilterPills');
+  const sems = _allSemesters.filter(s => _allCourses.some(c => c.semester_id === s.id));
+  pills.innerHTML = [
+    `<button class="sem-pill ${_courseFilterSem === null ? 'active' : ''}" onclick="_setSemFilter(null)">Todos</button>`,
+    ...sems.map(s => `<button class="sem-pill ${_courseFilterSem === s.id ? 'active' : ''}" onclick="_setSemFilter(${s.id})">${escHtml(s.name)}</button>`),
+  ].join('');
+}
+
+function _setSemFilter(semId) {
+  _courseFilterSem = semId;
+  buildSemFilterPills();
+  renderCoursesGrid();
+}
+
+function filterCoursesGrid() {
+  _courseFilterText = (document.getElementById('courseFilterInput')?.value || '').toLowerCase();
+  renderCoursesGrid();
+}
+
+function renderCoursesGrid() {
+  const grid = document.getElementById('coursesGrid');
+  const semMap = Object.fromEntries(_allSemesters.map(s => [s.id, s.name]));
+
+  let courses = _allCourses;
+  if (_courseFilterSem !== null) courses = courses.filter(c => c.semester_id === _courseFilterSem);
+  if (_courseFilterText) courses = courses.filter(c =>
+    (c.code||'').toLowerCase().includes(_courseFilterText) ||
+    (c.name||'').toLowerCase().includes(_courseFilterText) ||
+    (c.short_name||'').toLowerCase().includes(_courseFilterText)
+  );
+
+  if (!courses.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">Nenhum curso encontrado.</div>';
+    return;
+  }
+
+  grid.innerHTML = courses.map(c => `
+    <div class="course-card" id="ccard-${c.id}">
+      <div class="course-card-top">
+        <span class="course-card-code">${escHtml(c.code)}</span>
+        <div class="course-card-actions">
+          <button class="btn-ghost btn-sm" onclick="openEnrollPanel(${c.id},'${escHtml(c.name)}')" title="Gerir inscrições">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          </button>
+          <button class="btn-ghost btn-sm" onclick="openCourseModal(${c.id})" title="Editar">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-ghost btn-sm btn-danger" onclick="deleteCourse(${c.id},'${escHtml(c.name)}')" title="Eliminar">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="course-card-name">${escHtml(c.name)}</div>
+      ${c.short_name ? `<div class="course-card-short">${escHtml(c.short_name)}</div>` : ''}
+      <div class="course-card-sem">${escHtml(semMap[c.semester_id] || '—')}</div>
+      <div class="course-card-stats">
+        <span class="course-card-stat" id="enroll-count-${c.id}">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          —
+        </span>
+        <span class="course-card-stat" id="teach-count-${c.id}">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          —
+        </span>
+      </div>
+    </div>`).join('');
+
+  // Load counts async
+  courses.forEach(async c => {
+    const [enrolls, teaches] = await Promise.all([
+      apiFetch(`/admin/courses/${c.id}/enrollments`).catch(()=>[]),
+      apiFetch(`/admin/courses/${c.id}/instructors`).catch(()=>[]),
+    ]);
+    const ec = document.getElementById(`enroll-count-${c.id}`);
+    const tc = document.getElementById(`teach-count-${c.id}`);
+    if (ec) ec.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> ${enrolls.length} alunos`;
+    if (tc) tc.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ${teaches.length} docentes`;
+  });
+}
+
+async function openEnrollPanel(courseId, courseName) {
+  _activeCourseId = courseId;
+  document.getElementById('enrollCourseName').textContent = courseName;
+  document.getElementById('enrollCard').style.display = '';
+  switchEnrollTab('alunos');
+  await loadEnrollList(courseId);
+  await loadTeachList(courseId);
+}
+
+function switchEnrollTab(tab) {
+  const isAlunos = tab === 'alunos';
+  const tA = document.getElementById('tabAlunos');
+  const tD = document.getElementById('tabDocentes');
+  
+  tA.style.color = isAlunos ? 'var(--text-1)' : 'var(--text-3)';
+  tA.style.fontWeight = isAlunos ? '600' : '500';
+  tA.style.borderBottomColor = isAlunos ? 'var(--accent)' : 'transparent';
+  
+  tD.style.color = !isAlunos ? 'var(--text-1)' : 'var(--text-3)';
+  tD.style.fontWeight = !isAlunos ? '600' : '500';
+  tD.style.borderBottomColor = !isAlunos ? 'var(--accent)' : 'transparent';
+  
+  document.getElementById('enrollAlunosSection').style.display = isAlunos ? 'block' : 'none';
+  document.getElementById('enrollDocentesSection').style.display = !isAlunos ? 'block' : 'none';
+}
+
+async function loadTeachList(courseId) {
+  const list = document.getElementById('teachList');
+  try {
+    const instructors = await apiFetch(`/admin/courses/${courseId}/instructors`);
+    if (!instructors.length) {
+      list.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">Nenhum docente atribuído.</div>';
+      return;
+    }
+    list.innerHTML = instructors.map(i => `
+      <div style="padding:8px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)">
+        <div style="flex:1;font-size:13px">${escHtml(i.name)} <span style="color:var(--text-3);font-size:11px">${escHtml(i.email)}</span></div>
+        <button class="btn-ghost btn-sm btn-danger" onclick="removeInstructor(${courseId},${i.instructor_id})">Remover</button>
+      </div>`).join('');
+  } catch { list.innerHTML = '<div style="padding:16px;color:#ef4444;font-size:13px">Erro ao carregar.</div>'; }
+}
+
+async function addInstructor() {
+  const email = document.getElementById('teachEmail').value.trim();
+  if (!email) return;
+  const users = await apiFetch('/admin/users').catch(()=>[]);
+  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (!user) { showToast('Utilizador não encontrado', 'error'); return; }
+  if (user.role !== 'instructor' && user.role !== 'admin') { showToast('Utilizador não é um docente ou admin', 'error'); return; }
+  try {
+    await apiFetch(`/admin/courses/${_activeCourseId}/instructors`, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({instructor_id: user.id}),
+    });
+    document.getElementById('teachEmail').value = '';
+    showToast(`${user.name} atribuído como docente`);
+    loadTeachList(_activeCourseId);
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+async function removeInstructor(courseId, instructorId) {
+  if (!confirm('Remover este docente da UC?')) return;
+  try {
+    await apiFetch(`/admin/courses/${courseId}/instructors/${instructorId}`, {method:'DELETE'});
+    showToast('Removido');
+    loadTeachList(courseId);
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+async function loadEnrollList(courseId) {
+  const list = document.getElementById('enrollList');
+  try {
+    const enrolls = await apiFetch(`/admin/courses/${courseId}/enrollments`);
+    if (!enrolls.length) {
+      list.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">Nenhum aluno inscrito.</div>';
+      return;
+    }
+    list.innerHTML = enrolls.map(e => `
+      <div style="padding:8px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)">
+        <div style="flex:1;font-size:13px">${escHtml(e.name)} <span style="color:var(--text-3);font-size:11px">${escHtml(e.email)}</span></div>
+        <button class="btn-ghost btn-sm btn-danger" onclick="removeEnroll(${courseId},${e.student_id})">Remover</button>
+      </div>`).join('');
+  } catch { list.innerHTML = '<div style="padding:16px;color:#ef4444;font-size:13px">Erro ao carregar.</div>'; }
+}
+
+async function addEnrollment() {
+  const email = document.getElementById('enrollEmail').value.trim();
+  if (!email) return;
+  const users = await apiFetch('/admin/users').catch(()=>[]);
+  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (!user) { showToast('Utilizador não encontrado', 'error'); return; }
+  try {
+    await apiFetch(`/admin/courses/${_activeCourseId}/enrollments`, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({student_id: user.id}),
+    });
+    document.getElementById('enrollEmail').value = '';
+    showToast(`${user.name} inscrito`);
+    loadEnrollList(_activeCourseId);
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+async function bulkEnroll() {
+  const emails = document.getElementById('bulkEmails').value.trim();
+  if (!emails) return;
+  try {
+    const r = await apiFetch(`/admin/courses/${_activeCourseId}/bulk-enroll`, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({emails}),
+    });
+    document.getElementById('bulkEmails').value = '';
+    showToast(`${r.added} inscritos · ${r.skipped} já existiam · ${r.not_found} não encontrados`);
+    loadEnrollList(_activeCourseId);
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+async function removeEnroll(courseId, studentId) {
+  await apiFetch(`/admin/courses/${courseId}/enrollments/${studentId}`, {method:'DELETE'});
+  showToast('Removido');
+  loadEnrollList(courseId);
+}
+
+async function deleteCourse(id, name) {
+  if (!confirm(`Eliminar "${name}"? Remove a UC, todas as inscrições e histórico de chat.`)) return;
+  try {
+    await apiFetch(`/admin/courses/${id}`, {method:'DELETE'});
+    showToast(`"${name}" eliminado`);
+    loadCoursesPage();
+    loadCourses(); // refresh sidebar
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+// Course modal
+function openCourseModal(courseId) {
+  // Ensure prerequisite data is loaded before building the modal
+  const _open = (programs, semesters) => {
+    _allPrograms  = programs  || _allPrograms  || [];
+    _allSemesters = semesters || _allSemesters || [];
+
+    const isEdit = courseId != null;
+    const c = isEdit ? (_allCourses||[]).find(x => x.id === courseId) : null;
+    const progOptions = '<option value="">Nenhum (Geral)</option>' +
+      (_allPrograms||[]).map(p=>`<option value="${p.id}" ${c && c.program_id === p.id ? 'selected' : ''}>${escHtml(p.name)}</option>`).join('');
+
+    const semOptions = '<option value="">-- Seleciona um Semestre --</option>' +
+      _allSemesters.map(s =>
+        `<option value="${s.id}" ${c && c.semester_id === s.id ? 'selected' : ''}>${escHtml(s.name)}</option>`
+      ).join('');
+
+    const noSemWarn = !_allSemesters.length
+      ? '<div style="color:#f59e0b;font-size:11px;margin-top:4px">&#9888; Sem semestres criados. Cria um semestre primeiro no separador Semestres.</div>'
+      : '';
+
+    const html = `
+      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+        <input type="hidden" id="cmId" value="${courseId||''}" />
+        <div><label class="form-label">Código *</label><input class="form-input" id="cmCode" value="${escHtml(c?.code||'')}" placeholder="CS101" /></div>
+        <div><label class="form-label">Nome *</label><input class="form-input" id="cmName" value="${escHtml(c?.name||'')}" placeholder="Nome completo da UC" /></div>
+        <div><label class="form-label">Abreviatura</label><input class="form-input" id="cmShort" value="${escHtml(c?.short_name||'')}" placeholder="IBD" /></div>
+        <div><label class="form-label">Pertence ao Curso <span style="font-weight:400;opacity:.6">(ex: TICS, Gestão)</span></label><select class="form-input" id="editCourseProgram">${progOptions}</select></div>
+        <div><label class="form-label">Semestre *</label><select class="form-input" id="cmSemester">${semOptions}</select>${noSemWarn}</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn-ghost" onclick="document.getElementById('courseModalWrap').remove()">Cancelar</button>
+          <button class="btn-primary" onclick="saveCourse()">Guardar</button>
+        </div>
+      </div>`;
+
+    let wrap = document.getElementById('courseModalWrap');
+    if (wrap) wrap.remove();
+    wrap = document.createElement('div');
+    wrap.id = 'courseModalWrap';
+    wrap.innerHTML = `<div class="modal-backdrop" onclick="this.parentElement.remove()"></div>
+      <div class="modal"><div class="modal-header">${isEdit?'Editar':'Nova'} Disciplina (UC)<button class="modal-close" onclick="this.closest('#courseModalWrap').remove()">✕</button></div>${html}</div>`;
+    document.body.appendChild(wrap);
+  };
+
+  // Pre-fetch if needed
+  if (!_allSemesters?.length || !_allPrograms?.length) {
+    Promise.all([
+      apiFetch('/admin/programs').catch(() => _allPrograms || []),
+      apiFetch('/admin/semesters').catch(() => _allSemesters || []),
+    ]).then(([progs, sems]) => _open(progs, sems));
+  } else {
+    _open(_allPrograms, _allSemesters);
+  }
+}
+
+async function saveCourse() {
+  const id       = document.getElementById('cmId').value;
+  const semRaw   = document.getElementById('cmSemester').value;
+  const semester_id = semRaw ? parseInt(semRaw, 10) : null;
+
+  if (!semester_id || isNaN(semester_id)) {
+    showToast('Seleciona um semestre antes de guardar', 'error');
+    return;
+  }
+
+  const progRaw = document.getElementById('editCourseProgram')?.value;
+  const body = {
+    code:       document.getElementById('cmCode').value.trim(),
+    name:       document.getElementById('cmName').value.trim(),
+    short_name: document.getElementById('cmShort').value.trim() || null,
+    program_id: progRaw ? parseInt(progRaw, 10) : null,
+    semester_id,
+  };
+  if (!body.code || !body.name) { showToast('Código e nome são obrigatórios', 'error'); return; }
+  try {
+    if (id) await apiFetch(`/admin/courses/${id}`, {method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    else     await apiFetch('/admin/courses',       {method:'POST', headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    document.getElementById('courseModalWrap')?.remove();
+    showToast(id ? 'Disciplina atualizada' : 'Disciplina criada');
+    await loadCourses();
+    // Refresh whichever panel is visible
+    if (document.getElementById('kbPanel')?.style.display !== 'none') {
+      loadKBPanel();
+    } else if (document.getElementById('coursesPanel')?.style.display !== 'none') {
+      loadCoursesPage();
+    } else if (document.getElementById('gestaoPanel')?.style.display !== 'none') {
+      loadGDisciplinesPage();
+    }
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+// ── Semesters ─────────────────────────────────────────────────────────────────
+
+function selectSemesters() {
+  setActiveItem('semestersItem');
+  document.getElementById('activeCourseLabel').textContent = 'Semestres';
+  hideAllPanels();
+  document.getElementById('semestersPanel').style.display = 'flex';
+  closeSidebar();
+  loadSemesters();
+}
+
+async function loadSemesters() {
+  const list = document.getElementById('semesterList');
+  try {
+    _allSemesters = await apiFetch('/admin/semesters');
+    if (!_allSemesters.length) {
+      list.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">Nenhum semestre criado.</div>';
+      return;
+    }
+    list.innerHTML = _allSemesters.map(s => `
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">${escHtml(s.name)}</div>
+          <div style="font-size:11px;color:var(--text-3)">${s.start_date} → ${s.end_date}</div>
+        </div>
+        ${s.is_active ? '<span class="usage-badge" style="background:rgba(16,185,129,.15);color:#10b981">Ativo</span>' : ''}
+        <button class="btn-ghost btn-sm" onclick="openSemModal(${s.id})">Editar</button>
+        <button class="btn-ghost btn-sm btn-danger" onclick="deleteSemester(${s.id},'${escHtml(s.name)}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>`).join('');
+  } catch (err) { list.innerHTML = `<div style="padding:16px;color:#ef4444">${escHtml(err.message)}</div>`; }
+}
+
+function openSemModal(semId) {
+  const s = semId ? _allSemesters.find(x => x.id === semId) : null;
+  const html = `
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+      <input type="hidden" id="smId" value="${semId||''}" />
+      <div><label class="form-label">Nome</label><input class="form-input" id="smName" value="${escHtml(s?.name||'')}" placeholder="2025/26 — 1.º Semestre" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label class="form-label">Início</label><input class="form-input" id="smStart" type="date" value="${s?.start_date||''}" /></div>
+        <div><label class="form-label">Fim</label><input class="form-input" id="smEnd" type="date" value="${s?.end_date||''}" /></div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="smActive" ${s?.is_active?'checked':''} /> Semestre ativo (desativa os outros)
+      </label>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn-ghost" onclick="document.getElementById('semModalWrap').remove()">Cancelar</button>
+        <button class="btn-primary" onclick="saveSemester()">Guardar</button>
+      </div>
+    </div>`;
+  let wrap = document.getElementById('semModalWrap');
+  if (wrap) wrap.remove();
+  wrap = document.createElement('div'); wrap.id = 'semModalWrap';
+  wrap.innerHTML = `<div class="modal-backdrop" onclick="this.parentElement.remove()"></div>
+    <div class="modal"><div class="modal-header">${semId?'Editar':'Novo'} Semestre<button class="modal-close" onclick="this.closest('#semModalWrap').remove()">✕</button></div>${html}</div>`;
+  document.body.appendChild(wrap);
+}
+
+async function saveSemester() {
+  const id = document.getElementById('smId').value;
+  const body = {
+    name: document.getElementById('smName').value.trim(),
+    start_date: document.getElementById('smStart').value,
+    end_date: document.getElementById('smEnd').value,
+    is_active: document.getElementById('smActive').checked,
+  };
+  if (!body.name || !body.start_date || !body.end_date) { showToast('Preenche todos os campos','error'); return; }
+  try {
+    if (id) await apiFetch(`/admin/semesters/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    else     await apiFetch('/admin/semesters',       {method:'POST', headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    document.getElementById('semModalWrap')?.remove();
+    showToast(id ? 'Semestre atualizado' : 'Semestre criado');
+    loadSemesters();
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+async function deleteSemester(id, name) {
+  if (!confirm(`Eliminar semestre "${name}"?`)) return;
+  try {
+    await apiFetch(`/admin/semesters/${id}`, {method:'DELETE'});
+    showToast('Eliminado'); loadSemesters();
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+// ── Chat History ──────────────────────────────────────────────────────────────
+
+function selectHistory() {
+  setActiveItem('historyItem');
+  document.getElementById('activeCourseLabel').textContent = 'Histórico de Chats';
+  hideAllPanels();
+  document.getElementById('historyPanel').style.display = 'flex';
+  closeSidebar();
+  loadHistorySessions();
+}
+
+async function loadHistorySessions() {
+  const tbody = document.getElementById('historyTableBody');
+  try {
+    const sessions = await apiFetch('/admin/history/sessions');
+    if (!sessions.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-3)">Sem conversas ainda.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = sessions.map(s => `
+      <tr>
+        <td><div style="font-size:13px;font-weight:500">${escHtml(s.user_name)}</div><div style="font-size:11px;color:var(--text-3)">${escHtml(s.user_email)}</div></td>
+        <td style="font-size:12px">${escHtml(s.course)}</td>
+        <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(s.title||'—')}</td>
+        <td style="text-align:right;font-size:13px">${s.msg_count}</td>
+        <td style="font-size:11px;color:var(--text-3)">${_relTime(s.updated_at)}</td>
+        <td><button class="btn-ghost btn-sm" onclick="viewSession(${s.id},'${escHtml(s.title||'Conversa')}')">Ver</button></td>
+      </tr>`).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:24px">${escHtml(err.message)}</td></tr>`;
+  }
+}
+
+async function viewSession(id, title) {
+  const card = document.getElementById('historyConvCard');
+  const body = document.getElementById('historyConvBody');
+  document.getElementById('historyConvTitle').textContent = title;
+  card.style.display = '';
+  body.innerHTML = '<div style="padding:16px;color:var(--text-3)">A carregar...</div>';
+  card.scrollIntoView({behavior:'smooth'});
+  try {
+    const s = await apiFetch(`/admin/history/sessions/${id}`);
+    body.innerHTML = s.messages.map(m => `
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px">
+        <div style="width:64px;flex-shrink:0;font-size:11px;font-weight:600;color:${m.role==='user'?'var(--accent)':'#10b981'};padding-top:2px">${m.role==='user'?'Aluno':'Bot'}</div>
+        <div style="flex:1;font-size:13px;line-height:1.6;white-space:pre-wrap">${escHtml(m.content)}</div>
+        ${m.rating ? `<div style="font-size:16px">${m.rating===1?'👍':'👎'}</div>` : ''}
+      </div>`).join('');
+  } catch { body.innerHTML = '<div style="padding:16px;color:#ef4444">Erro ao carregar.</div>'; }
+}
+
+// ── Insights ──────────────────────────────────────────────────────────────────
+
+function selectInsights() {
+  setActiveItem('insightsItem');
+  document.getElementById('activeCourseLabel').textContent = 'Insights & Qualidade';
+  hideAllPanels();
+  document.getElementById('insightsPanel').style.display = 'flex';
+  closeSidebar();
+  loadInsights();
+}
+
+async function loadInsights() {
+  try {
+    const d = await apiFetch('/admin/insights');
+    document.getElementById('ins-failed').textContent = d.failed_queries?.length ?? 0;
+    document.getElementById('ins-low').textContent    = d.thumbs_down ?? 0;
+    document.getElementById('ins-up').textContent     = d.thumbs_up ?? 0;
+
+    const fl = document.getElementById('insFailedList');
+    if (!d.failed_queries?.length) {
+      fl.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">Nenhuma pergunta sem resposta. 🎉</div>';
+    } else {
+      fl.innerHTML = d.failed_queries.map(q => `
+        <div style="padding:9px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span style="font-size:13px">${escHtml(q.question)}</span>
+        </div>`).join('');
+    }
+
+    const ll = document.getElementById('insLowList');
+    if (!d.low_rated?.length) {
+      ll.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">Sem avaliações negativas. 🎉</div>';
+    } else {
+      ll.innerHTML = d.low_rated.map(q => `
+        <div style="padding:9px 16px;border-bottom:1px solid var(--border)">
+          <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:3px">❓ ${escHtml(q.question)}</div>
+          <div style="font-size:12px;color:var(--text-3)">${escHtml(q.answer_excerpt)}…</div>
+        </div>`).join('');
+    }
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+// ── Live Feed ─────────────────────────────────────────────────────────────────
+
+function selectLiveFeed() {
+  setActiveItem('liveFeedItem');
+  document.getElementById('activeCourseLabel').textContent = 'Feed em Direto';
+  hideAllPanels();
+  document.getElementById('liveFeedPanel').style.display = 'flex';
+  closeSidebar();
+  loadLiveFeedStatus();
+}
+
+async function loadLiveFeedStatus() {
+  try {
+    const d = await apiFetch('/admin/live-feed/status');
+    document.getElementById('feedLastFetch').textContent   = d.last_fetch   || 'Nunca';
+    document.getElementById('feedItemsCount').textContent  = d.items_count  != null ? d.items_count : '—';
+    const errRow = document.getElementById('feedErrorRow');
+    if (d.last_error) {
+      document.getElementById('feedLastError').textContent = d.last_error;
+      errRow.style.display = '';
+    } else {
+      errRow.style.display = 'none';
+    }
+  } catch (err) {
+    document.getElementById('feedLastFetch').textContent = 'Erro ao carregar';
+  }
+}
+
+async function runLiveFetch() {
+  const btn     = document.getElementById('feedFetchBtn');
+  const spinner = document.getElementById('feedSpinner');
+  const badge   = document.getElementById('feedBadge');
+  btn.disabled = true;
+  spinner.style.display = '';
+
+  try {
+    const d = await apiFetch('/admin/live-feed/fetch', { method: 'POST' });
+
+    const total = (d.news_count || 0) + (d.event_count || 0);
+    document.getElementById('feedLastFetch').textContent  = d.fetched_at || '—';
+    document.getElementById('feedItemsCount').textContent = total;
+
+    const errRow = document.getElementById('feedErrorRow');
+    if (d.error) {
+      document.getElementById('feedLastError').textContent = d.error;
+      errRow.style.display = '';
+    } else {
+      errRow.style.display = 'none';
+    }
+
+    // Update sidebar badge
+    if (total > 0) {
+      badge.textContent   = total;
+      badge.style.display = '';
+    }
+
+    // Render items preview — first news_count are news, rest are events
+    const items = d.items || [];
+    if (items.length) {
+      const newsCount = d.news_count || 0;
+      const listEl = document.getElementById('feedItemsList');
+      listEl.innerHTML = items.map((item, i) => {
+        const typeLabel = i < newsCount ? 'Notícia' : 'Evento';
+        return `
+        <div class="feed-item">
+          <div class="feed-item-type">${typeLabel}</div>
+          <div class="feed-item-title"><a href="${item.url}" target="_blank" rel="noopener">${item.title}</a></div>
+          ${item.date ? `<div class="feed-item-meta">${item.date}</div>` : ''}
+          ${item.content ? `<div class="feed-item-excerpt">${item.content.slice(0, 180)}…</div>` : ''}
+        </div>`;
+      }).join('');
+      document.getElementById('feedResultsCard').style.display = '';
+    }
+
+    showToast(`Feed actualizado: ${d.news_count || 0} notícias, ${d.event_count || 0} eventos.`, 'success');
+  } catch (err) {
+    showToast('Erro ao actualizar feed: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+// ── AI Settings ───────────────────────────────────────────────────────────────
+
+function selectAISettings() {
+  setActiveItem('aiSettingsItem');
+  document.getElementById('activeCourseLabel').textContent = 'Configurações IA';
+  hideAllPanels();
+  document.getElementById('aiSettingsPanel').style.display = 'flex';
+  closeSidebar();
+  loadAISettings();
+}
+
+async function loadAISettings() {
+  try {
+    const d = await apiFetch('/admin/ai-settings');
+    document.getElementById('aiModel').value        = d.model || '';
+    document.getElementById('aiTemp').value         = d.temperature ?? 1.0;
+    document.getElementById('tempVal').textContent  = parseFloat(d.temperature ?? 1.0).toFixed(1);
+    document.getElementById('aiSystemPrompt').value = d.system_prompt || '';
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+async function saveAISettings() {
+  try {
+    await apiFetch('/admin/ai-settings', {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:         document.getElementById('aiModel').value.trim(),
+        temperature:   parseFloat(document.getElementById('aiTemp').value),
+        system_prompt: document.getElementById('aiSystemPrompt').value.trim(),
+      }),
+    });
+    showToast('Configurações guardadas — aplicadas na próxima mensagem');
+  } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+}
+
+async function exportCSV(type, e) {
+  e.preventDefault();
+  const url = `/api/admin/export/${type}`;
+  const res = await fetch(url, {headers: {'Authorization': `Bearer ${token}`}});
+  if (!res.ok) { showToast('Erro ao exportar','error'); return; }
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = type === 'usage' ? 'utilizacao.csv' : 'conversas.csv';
+  a.click();
+}
+
+// ── Usage ─────────────────────────────────────────────────────────────────────
+
+function selectUsage() {
+  setActiveItem('usageItem');
+  document.getElementById('activeCourseLabel').textContent = 'Utilização & Limites';
+  hideAllPanels();
+  document.getElementById('usagePanel').style.display  = 'flex';
+  closeSidebar();
+  loadUsagePanel();
+}
+
+async function loadUsagePanel() {
+  try {
+    const data = await apiFetch('/admin/settings');
+    document.getElementById('rateLimitInput').value = data.rate_limit_per_hour ?? 0;
+  } catch { /* ignore */ }
+  await loadUsage();
+}
+
+async function saveRateLimit() {
+  const val = parseInt(document.getElementById('rateLimitInput').value, 10);
+  if (isNaN(val) || val < 0) { showToast('Valor inválido', 'error'); return; }
+  try {
+    await apiFetch('/admin/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rate_limit_per_hour: val }),
+    });
+    showToast(val === 0 ? 'Limite removido — sem restrições' : `Limite guardado: ${val} msg/hora`);
+    await loadUsage();
+  } catch (err) {
+    showToast('Erro: ' + err.message, 'error');
+  }
+}
+
+async function loadUsage() {
+  const tbody = document.getElementById('usageTableBody');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:20px">A carregar...</td></tr>';
+  try {
+    const data  = await apiFetch('/admin/usage');
+    const limit = data.rate_limit_per_hour || 0;
+    if (!data.users.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:20px">Nenhum aluno utilizou o chatbot ainda.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.users.map(u => {
+      const over = limit > 0 && u.last_hour >= limit;
+      const warn = limit > 0 && u.last_hour >= limit * 0.8;
+      return `<tr class="${over ? 'usage-over' : warn ? 'usage-warn' : ''}">
+        <td>
+          <div style="font-weight:500">${escHtml(u.name)}</div>
+          <div style="font-size:11px;color:var(--text-3)">${escHtml(u.email)}</div>
+        </td>
+        <td style="text-align:right;font-weight:600;color:${over ? '#ef4444' : warn ? '#f59e0b' : 'inherit'}">${u.last_hour}</td>
+        <td style="text-align:right">${u.last_day}</td>
+        <td style="text-align:right">${u.last_week}</td>
+        <td style="text-align:right">
+          ${over ? '<span class="usage-badge usage-badge-over">Limite atingido</span>' :
+            warn ? '<span class="usage-badge usage-badge-warn">Atenção</span>' : ''}
+        </td>
+      </tr>`;
+    }).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#ef4444;padding:20px">Erro: ${escHtml(err.message)}</td></tr>`;
+  }
+}
+
+// ── File input ────────────────────────────────────────────────────────────────
+
+function onDragOver(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.add('drag-over');
+}
+function onDragLeave() {
+  document.getElementById('dropZone').classList.remove('drag-over');
+}
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  const files = Array.from(e.dataTransfer.files).filter(validFile);
+  if (files.length) processQueue(files);
+}
+function handleFileInput(e) {
+  const files = Array.from(e.target.files).filter(validFile);
+  if (files.length) processQueue(files);
+  e.target.value = '';
+}
+function validFile(f) {
+  return /\.(pdf|txt)$/i.test(f.name);
+}
+
+// ── Queue processor ───────────────────────────────────────────────────────────
+
+async function processQueue(files) {
+  document.getElementById('dropZone').style.display       = 'none';
+  document.getElementById('extractLoading').style.display = 'flex';
+
+  // Snapshot destination at queue-start to prevent mid-upload course switches
+  const snapshotCourse = activeCourse ? { ...activeCourse } : null;
+  const isMultiple = files.length > 1;
+  let saved = 0, errors = 0;
+  let lastData = null;
+
+  if (isMultiple) {
+    document.getElementById('queueProgressWrap').style.display = 'flex';
+    document.getElementById('uploadSteps').style.display = 'none';
+  }
+
+  for (let i = 0; i < files.length; i++) {
+    const file  = files[i];
+    const label = file.name.replace(/\.[^.]+$/, '');
+    const prefix = isMultiple ? `[${i + 1}/${files.length}] ` : '';
+
+    if (isMultiple) {
+      document.getElementById('queueFileLabel').textContent = file.name;
+      document.getElementById('queueBarFill').style.width   = `${Math.round((i / files.length) * 100)}%`;
+      document.getElementById('queueCounter').textContent   = `${i + 1} / ${files.length} ficheiros`;
+    }
+
+    setBlobStage('');
+    setLoadingText(`${prefix}A extrair "${file.name}"...`);
+
+    try {
+      if (isMultiple) {
+        // Bulk: fast extract + save (no LLM). AI cleanup runs after as a background job.
+        lastData = await ingestFile(file, snapshotCourse);
+        if (lastData.status === 'skipped' || lastData.status === 'duplicate') { errors++; continue; }
+        saved++;
+        setBlobStage('done');
+      } else {
+        // Single file: full AI organize + review flow
+        const organized = await extractFile(file, '');
+        setBlobStage('done');
+        setLoadingText('A guardar na base de conhecimento...');
+        lastData = await apiFetch('/admin/save', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            content:     organized,
+            doc_label:   label,
+            course_id:   snapshotCourse?.id         ?? null,
+            semester_id: snapshotCourse?.semester_id ?? null,
+          }),
+        });
+        saved++;
+      }
+    } catch (err) {
+      errors++;
+      _setStep(3, 'pending');
+      setBlobStage('');
+      setLoadingText(`Erro: ${err.message || 'falha desconhecida'}`);
+      console.warn('Erro com', file.name, err);
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+
+
+  if (isMultiple) {
+    document.getElementById('queueBarFill').style.width = '100%';
+    document.getElementById('queueCounter').textContent = `${files.length} / ${files.length} ficheiros`;
+  }
+
+  await loadKnowledgeContent();
+  document.getElementById('extractLoading').style.display  = 'none';
+  document.getElementById('uploadSteps').style.display     = 'none';
+  document.getElementById('queueProgressWrap').style.display = 'none';
+  document.getElementById('dropZone').style.display        = 'flex';
+
+  const parts = [];
+  if (saved)  parts.push(`${saved} ficheiro(s) guardado(s)`);
+  if (errors) parts.push(`${errors} com erro`);
+  const msg = isMultiple
+    ? parts.join(' · ')
+    : `"${files[0].name}" guardado. Base de conhecimento: ${formatSize(lastData?.total_chars ?? 0)}`;
+  showToast(msg, errors && !saved ? 'error' : 'success');
+}
+
+function setBlobStage(stage) {
+  const container = document.querySelector('.blob-container');
+  if (!container) return;
+  container.className = 'blob-container' + (stage ? ` blob-stage-${stage}` : '');
+}
+
+function _setStep(n, state) {
+  // state: 'active' | 'done' | 'pending'
+  const el = document.getElementById(`step${n}`);
+  if (!el) return;
+  el.className = 'upload-step ' + state;
+  if (state === 'active') {
+    el.style.opacity = '1';
+    el.querySelector('.step-icon').textContent = '⟳';
+  } else if (state === 'done') {
+    el.style.opacity = '1';
+    el.querySelector('.step-icon').textContent = '';
+  } else {
+    el.style.opacity = '0.4';
+    el.querySelector('.step-icon').textContent = '⏳';
+  }
+}
+
+async function extractFile(file, prefix = '') {
+  const label = file.name.replace(/\.[^.]+$/, '');
+
+  // Show step indicator
+  const stepsEl = document.getElementById('uploadSteps');
+  if (stepsEl) { stepsEl.style.display = 'flex'; _setStep(1,'active'); _setStep(2,'pending'); _setStep(3,'pending'); }
+
+  // Step 1 — upload + extract raw text
+  setBlobStage('extract');
+  setLoadingText(`${prefix}Passo 1/3 — A carregar "${file.name}"...`);
+  const form1 = new FormData();
+  form1.append('file', file);
+  const res1 = await fetch(`${API}/admin/extract-raw`, {
+    method:  'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body:    form1,
+  });
+  if (!res1.ok) throw new Error(await res1.text());
+  const { raw_text } = await res1.json();
+  _setStep(1, 'done'); _setStep(2, 'active');
+
+  // Step 2 — extract done (visual pause so user sees it)
+  setLoadingText(`${prefix}Passo 2/3 — Texto extraído. A preparar IA…`);
+  await new Promise(r => setTimeout(r, 600));
+  _setStep(2, 'done'); _setStep(3, 'active');
+
+  // Step 3 — organize + thorough clean with LLM (single pass)
+  setBlobStage('organize');
+  setLoadingText(`${prefix}Passo 3/3 — A organizar com IA…`);
+  const res2 = await fetch(`${API}/admin/jobs/organize`, {
+    method:  'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ raw_text, doc_label: label }),
+  });
+  if (!res2.ok) throw new Error(await res2.text());
+  const { job_id } = await res2.json();
+
+  jobsAdd(job_id, {
+    filename:    file.name,
+    doc_label:   label,
+    course_id:   activeCourse?.id         ?? null,
+    semester_id: activeCourse?.semester_id ?? null,
+  });
+  jobsStartPolling();
+
+  const organized = await _waitForJob(job_id);
+  _setStep(3, 'done');
+  if (stepsEl) setTimeout(() => { stepsEl.style.display = 'none'; }, 800);
+
+  return organized;
+}
+
+function _waitForJob(job_id) {
+  return new Promise((resolve, reject) => {
+    let _settled = false;
+    function settle(fn, val) {
+      if (_settled) return;
+      _settled = true;
+      window.removeEventListener('isla-job-done', onDone);
+      fn(val);
+    }
+
+    // jobs.js fires this event when its own poll loop detects completion
+    function onDone(e) {
+      if (e.detail.job_id !== job_id) return;
+      if (e.detail.status === 'error') settle(reject, new Error(e.detail.error || 'Erro desconhecido'));
+      else settle(resolve, e.detail.organized);
+    }
+    window.addEventListener('isla-job-done', onDone);
+
+    // Our own faster poll loop (every 3 s — in sync with jobs.js so no duplicates)
+    _pollJobFast(job_id, settle.bind(null, resolve), settle.bind(null, reject));
+
+    // Hard timeout — give up after 4 minutes
+    setTimeout(() => {
+      jobsRemove(job_id);
+      settle(reject, new Error('O tempo limite foi atingido. O modelo demorou demasiado a responder.'));
+    }, 4 * 60 * 1000);
+  });
+}
+
+async function _pollJobFast(job_id, resolve, reject) {
+  const POLL_INTERVAL = 3000;
+  while (true) {
+    await new Promise(r => setTimeout(r, POLL_INTERVAL));
+    try {
+      const res  = await fetch(`${API}/admin/jobs/${job_id}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!res.ok) { reject(new Error('Erro ao verificar estado do job')); return; }
+      const data = await res.json();
+      if (data.status === 'done') {
+        jobsRemove(job_id);
+        setBlobStage('done');
+        setLoadingText('Pronto! A carregar resultado...');
+        await new Promise(r => setTimeout(r, 600));
+        setBlobStage('');
+        resolve(data.organized);
+        return;
+      }
+      if (data.status === 'error') {
+        jobsRemove(job_id);
+        reject(new Error(data.error || 'Erro desconhecido'));
+        return;
+      }
+    } catch { /* network hiccup, keep polling */ }
+  }
+}
+
+async function _waitForReorganize(job_id, totalFiles) {
+  // Poll the reorganize job and update loading text with live progress.
+  // Timeout after 15 minutes (reorganizing many files can take a while).
+  const deadline = Date.now() + 15 * 60 * 1000;
+  while (Date.now() < deadline) {
+    await new Promise(r => setTimeout(r, 3000));
+    try {
+      const res  = await fetch(`${API}/admin/jobs/${job_id}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Erro ao verificar job');
+      const data = await res.json();
+      if (data.status === 'done') return data.summary;
+      if (data.status === 'error') throw new Error(data.error || 'Erro desconhecido');
+      // Show live progress if available
+      if (data.done_blocks != null && data.total_blocks != null) {
+        setLoadingText(`A limpar com IA… ${data.done_blocks}/${data.total_blocks} blocos`);
+      } else if (data.current_block) {
+        setLoadingText(`A limpar com IA… "${data.current_block}"`);
+      }
+    } catch (e) { throw e; }
+  }
+  throw new Error('Tempo limite atingido durante a limpeza com IA.');
+}
+
+async function ingestFile(file, courseSnapshot = activeCourse) {
+  // Fast path: extract raw text + save in one request, no LLM organize.
+  // courseSnapshot is captured at queue-start to prevent mid-upload course switches
+  // from routing files to the wrong knowledge base.
+  const label = file.name.replace(/\.[^.]+$/, '');
+  const form  = new FormData();
+  form.append('file', file);
+  form.append('doc_label', label);
+  if (courseSnapshot?.id)          form.append('course_id',   courseSnapshot.id);
+  if (courseSnapshot?.semester_id) form.append('semester_id', courseSnapshot.semester_id);
+
+  const res = await fetch(`${API}/admin/ingest`, {
+    method:  'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body:    form,
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function saveOrganized(content, label) {
+  const body = {
+    content,
+    doc_label:   label,
+    course_id:   activeCourse?.id         ?? null,
+    semester_id: activeCourse?.semester_id ?? null,
+  };
+  await apiFetch('/admin/save', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(body),
+  });
+}
+
+function setQueueProgress(done, total, filename) {
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('queueFileLabel').textContent =
+    done < total ? filename : 'A finalizar...';
+  document.getElementById('queueBarFill').style.width   = pct + '%';
+  document.getElementById('queueCounter').textContent   = `${done + 1} / ${total} ficheiros`;
+}
+
+function setLoadingText(txt) {
+  document.getElementById('extractLoadingText').textContent = txt;
+}
+
+// ── Knowledge viewer ──────────────────────────────────────────────────────────
+
+const KB_PAGE_SIZE = 30_000;  // chars per page
+let _kbPage      = 0;
+let _kbTotalChars = 0;
+let _kbLoaded    = false;  // has first page been loaded for current course
+
+function _kbParams(extra = '') {
+  const base = activeCourse
+    ? `?course_id=${activeCourse.id}&semester_id=${activeCourse.semester_id}`
+    : '?';
+  return base + extra;
+}
+
+// Called after saves/uploads — only refreshes the size badge, does NOT load content.
+async function loadKnowledgeContent() {
+  try {
+    const data = await apiFetch(`/admin/knowledge${_kbParams('&limit=0')}`);
+    _kbTotalChars = data.chars;
+    document.getElementById('knowledgeSize').textContent =
+      data.chars ? formatSize(data.chars) : '0 caracteres';
+    // If the viewer is open, reload the current page
+    if (_kbLoaded && document.getElementById('knowledgeBody').style.display !== 'none') {
+      loadKnowledgePage(_kbPage);
+    } else {
+      _kbLoaded = false;  // invalidate so next open re-fetches
+    }
+  } catch { /* ignore */ }
+}
+
+async function loadKnowledgePage(page) {
+  const offset = page * KB_PAGE_SIZE;
+  document.getElementById('kbViewerLoading').style.display = 'block';
+  document.getElementById('kbViewer').style.display        = 'none';
+  try {
+    const data = await apiFetch(
+      `/admin/knowledge${_kbParams(`&offset=${offset}&limit=${KB_PAGE_SIZE}`)}`
+    );
+    _kbTotalChars = data.chars;
+    _kbPage       = page;
+    _kbLoaded     = true;
+
+    const viewer = document.getElementById('kbViewer');
+    viewer.textContent = data.content || '(vazio)';
+    document.getElementById('knowledgeSize').textContent =
+      data.chars ? formatSize(data.chars) : '0 caracteres';
+
+    // Pagination controls
+    const totalPages = Math.max(1, Math.ceil(data.chars / KB_PAGE_SIZE));
+    const pagination = document.getElementById('kbPagination');
+    if (totalPages > 1) {
+      pagination.style.display = 'flex';
+      document.getElementById('kbPageLabel').textContent = `Parte ${page + 1} / ${totalPages}`;
+      document.getElementById('kbPrevBtn').disabled = page === 0;
+      document.getElementById('kbNextBtn').disabled = !data.has_more;
+    } else {
+      pagination.style.display = 'none';
+    }
+  } catch (err) {
+    document.getElementById('kbViewer').textContent = 'Erro ao carregar: ' + err.message;
+  } finally {
+    document.getElementById('kbViewerLoading').style.display = 'none';
+    document.getElementById('kbViewer').style.display        = 'block';
+  }
+}
+
+function kbChangePage(delta) {
+  const next = _kbPage + delta;
+  if (next < 0) return;
+  loadKnowledgePage(next);
+}
+
+function toggleKnowledge() {
+  const body    = document.getElementById('knowledgeBody');
+  const chevron = document.getElementById('knowledgeChevron');
+  const open    = body.style.display !== 'none';
+  if (open) {
+    body.style.display      = 'none';
+    chevron.style.transform = '';
+  } else {
+    body.style.display      = 'block';
+    chevron.style.transform = 'rotate(180deg)';
+    if (!_kbLoaded) loadKnowledgePage(0);
+  }
+}
+
+async function enableKbEdit() {
+  // Load full content into textarea (no pagination)
+  document.getElementById('editKbBtn').style.display  = 'none';
+  document.getElementById('kbViewerWrap').style.display = 'none';
+  document.getElementById('kbEditorWrap').style.display = 'block';
+  document.getElementById('kbPagination').style.display = 'none';
+  const ta = document.getElementById('kbTextarea');
+  ta.value = 'A carregar conteúdo completo…';
+  try {
+    const data = await apiFetch(`/admin/knowledge${_kbParams('')}`);
+    ta.value   = data.content;
+    kbOriginal = data.content;
+    ta.focus();
+  } catch (err) {
+    ta.value = '';
+    showToast('Erro ao carregar: ' + err.message, 'error');
+  }
+}
+
+async function saveKbEdit() {
+  const content = document.getElementById('kbTextarea').value;
+  try {
+    const data = await apiFetch(`/admin/knowledge${_kbParams('')}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ content }),
+    });
+    showToast(`Guardado. ${formatSize(data.chars)}`);
+    kbOriginal    = content;
+    _kbTotalChars = data.chars;
+    _kbLoaded     = false;
+    cancelKbEdit();
+    loadKnowledgePage(0);
+  } catch (err) {
+    showToast('Erro: ' + err.message, 'error');
+  }
+}
+
+function cancelKbEdit() {
+  document.getElementById('kbEditorWrap').style.display  = 'none';
+  document.getElementById('kbViewerWrap').style.display  = 'block';
+  document.getElementById('editKbBtn').style.display     = '';
+  const totalPages = Math.ceil(_kbTotalChars / KB_PAGE_SIZE);
+  if (totalPages > 1) document.getElementById('kbPagination').style.display = 'flex';
+}
+
+async function clearKnowledge() {
+  if (!confirm('Apagar toda a base de conhecimento? Esta acção não pode ser desfeita.')) return;
+  try {
+    await apiFetch(`/admin/knowledge${_kbParams('')}`, { method: 'DELETE' });
+    document.getElementById('kbViewer').textContent       = '(vazio)';
+    document.getElementById('knowledgeSize').textContent  = '0 caracteres';
+    document.getElementById('kbPagination').style.display = 'none';
+    _kbTotalChars = 0;
+    _kbLoaded     = true;
+    kbOriginal    = '';
+    showToast('Base de conhecimento limpa.');
+  } catch (err) {
+    showToast('Erro: ' + err.message, 'error');
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+
+function showToast(msg, type = 'success') {
+  const el = document.getElementById('adminToast');
+  el.textContent = msg;
+  el.className   = `admin-toast admin-toast-${type} admin-toast-visible`;
+  setTimeout(() => el.classList.remove('admin-toast-visible'), 3500);
+}
+
+function formatSize(chars) {
+  return chars >= 1000 ? `${(chars / 1000).toFixed(1)} KB` : `${chars} caracteres`;
+}
+
+// ── Documents list ────────────────────────────────────────────────────────────
+
+function toggleDocuments() {
+  const body    = document.getElementById('documentsBody');
+  const chevron = document.getElementById('docsChevron');
+  const open    = body.style.display !== 'none';
+  body.style.display      = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+  if (!open) loadDocuments();
+}
+
+async function loadDocuments() {
+  const params = activeCourse
+    ? `?course_id=${activeCourse.id}&semester_id=${activeCourse.semester_id}`
+    : '';
+  try {
+    const data = await apiFetch(`/admin/documents${params}`);
+    renderDocuments(data.documents || []);
+  } catch { renderDocuments([]); }
+}
+
+function renderDocuments(docs) {
+  const list = document.getElementById('docList');
+  const count = document.getElementById('docCount');
+  count.textContent = docs.length ? `${docs.length} documento(s)` : '0 documentos';
+
+  if (!docs.length) {
+    list.innerHTML = '<div class="doc-empty">Nenhum documento encontrado.</div>';
+    return;
+  }
+
+  list.innerHTML = docs.map(d => `
+    <div class="doc-row" id="doc-row-${CSS.escape(d.label)}">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--text-3)">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+      <span class="doc-row-label" title="${escHtml(d.label)}">${escHtml(d.label)}</span>
+      <span class="doc-row-date">${escHtml(d.added)}</span>
+      <button class="doc-delete-btn" onclick="deleteDocument(${JSON.stringify(d.label)}, this)" title="Remover documento">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/>
+        </svg>
+      </button>
+    </div>`).join('');
+}
+
+async function deleteDocument(docLabel, btn) {
+  if (!confirm(`Remover "${docLabel}" da base de conhecimento?`)) return;
+  const params = activeCourse
+    ? `?course_id=${activeCourse.id}&semester_id=${activeCourse.semester_id}`
+    : '';
+  try {
+    await apiFetch(`/admin/documents/${encodeURIComponent(docLabel)}${params}`, { method: 'DELETE' });
+    btn.closest('.doc-row').remove();
+    const remaining = document.querySelectorAll('.doc-row').length;
+    document.getElementById('docCount').textContent = `${remaining} documento(s)`;
+    if (!remaining) document.getElementById('docList').innerHTML = '<div class="doc-empty">Nenhum documento encontrado.</div>';
+    showToast(`"${docLabel}" removido.`);
+    loadKnowledgeContent();
+  } catch (err) {
+    showToast('Erro ao remover: ' + err.message, 'error');
+  }
+}
+
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+init();
+
+// ── Gestão Completa ───────────────────────────────────────────────────────────
+
+let _gTab = 1;
+let _gAllUsers = [];
+
+function selectGestao() {
+  setActiveItem('gestaoItem');
+  document.getElementById('activeCourseLabel').textContent = 'Gestão';
+  hideAllPanels();
+  document.getElementById('gestaoPanel').style.display = 'flex';
+  closeSidebar();
+  _gTab = 1;
+  switchGTab(1);
+}
+
+function switchGTab(n) {
+  _gTab = n;
+  [1,2,3,4].forEach(i => {
+    const sec = document.getElementById('gSection'+i);
+    const tab = document.getElementById('gTab'+i);
+    if(sec) sec.style.display = i===n ? '' : 'none';
+    if(tab) {
+      tab.style.color = i===n ? 'var(--accent)' : 'var(--text-3)';
+      tab.style.fontWeight = i===n ? '600' : '500';
+      tab.style.borderBottom = i===n ? '2px solid var(--accent)' : '2px solid transparent';
+    }
+  });
+  if(n===1) loadGCourses();
+  if(n===2) loadGDisciplinesPage();
+  if(n===3) loadGUsers();
+  if(n===4) loadGAssignmentsPage();
+}
+
+// ── Atribuições (Tab 4) ───────────────────────────────────────────────────────
+
+let _asgCourses = [];
+
+async function loadGAssignmentsPage() {
+  // Populate both course selects
+  try {
+    _asgCourses = await apiFetch('/admin/courses');
+  } catch { _asgCourses = []; }
+  const opts = '<option value="">— Seleciona uma UC —</option>' +
+    _asgCourses.map(c => `<option value="${c.id}">${escHtml(c.code)} — ${escHtml(c.name)}</option>`).join('');
+  const s1 = document.getElementById('asgCourseSelect');
+  const s2 = document.getElementById('asgEnrollCourseSelect');
+  if(s1) s1.innerHTML = opts;
+  if(s2) s2.innerHTML = opts;
+}
+
+async function loadAsgInstructors() {
+  const courseId = document.getElementById('asgCourseSelect').value;
+  const el = document.getElementById('asgInstructorList');
+  if(!courseId) { el.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">Seleciona uma UC para ver os docentes atribuídos.</div>'; return; }
+  el.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">A carregar...</div>';
+  try {
+    const rows = await apiFetch(`/admin/courses/${courseId}/instructors`);
+    if(!rows.length) { el.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">Nenhum docente atribuído ainda.</div>'; return; }
+    el.innerHTML = '<table class="usage-table"><thead><tr><th>Nome</th><th>Email</th><th></th></tr></thead><tbody>' +
+      rows.map(r => `<tr>
+        <td style="font-weight:500;font-size:13px">${escHtml(r.name)}</td>
+        <td style="font-size:12px;color:var(--text-3)">${escHtml(r.email)}</td>
+        <td style="text-align:right"><button class="btn-ghost btn-sm btn-danger" onclick="removeInstructor(${courseId},${r.instructor_id})">Remover</button></td>
+      </tr>`).join('') + '</tbody></table>';
+  } catch(e) { el.innerHTML = `<div style="padding:16px;color:#ef4444">${escHtml(e.message)}</div>`; }
+}
+
+async function assignInstructor() {
+  const courseId = document.getElementById('asgCourseSelect').value;
+  const email    = document.getElementById('asgInstructorEmail').value.trim();
+  if(!courseId) { showToast('Seleciona uma disciplina primeiro', 'error'); return; }
+  if(!email)    { showToast('Insere o email do docente', 'error'); return; }
+  try {
+    // Resolve email → user id
+    const users = await apiFetch('/admin/users');
+    const u = users.find(x => x.email.toLowerCase() === email.toLowerCase());
+    if(!u) { showToast('Utilizador não encontrado: ' + email, 'error'); return; }
+    if(u.role !== 'instructor') { showToast('O utilizador não tem o papel de Docente', 'error'); return; }
+    await apiFetch(`/admin/courses/${courseId}/instructors`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({instructor_id: u.id})
+    });
+    showToast(`${u.name} atribuído com sucesso`);
+    document.getElementById('asgInstructorEmail').value = '';
+    loadAsgInstructors();
+  } catch(e) { showToast('Erro: ' + e.message, 'error'); }
+}
+
+async function removeInstructor(courseId, instructorId) {
+  if(!confirm('Remover este docente da disciplina?')) return;
+  try {
+    await apiFetch(`/admin/courses/${courseId}/instructors/${instructorId}`, {method:'DELETE'});
+    showToast('Docente removido');
+    loadAsgInstructors();
+  } catch(e) { showToast('Erro: ' + e.message, 'error'); }
+}
+
+async function loadAsgEnrollments() {
+  const courseId = document.getElementById('asgEnrollCourseSelect').value;
+  const el = document.getElementById('asgEnrollList');
+  if(!courseId) { el.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">Seleciona uma UC para ver os alunos inscritos.</div>'; return; }
+  el.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">A carregar...</div>';
+  try {
+    const rows = await apiFetch(`/admin/courses/${courseId}/enrollments`);
+    if(!rows.length) { el.innerHTML = '<div style="padding:16px;color:var(--text-3);font-size:13px">Nenhum aluno inscrito ainda.</div>'; return; }
+    el.innerHTML = '<table class="usage-table"><thead><tr><th>Nome</th><th>Email</th><th></th></tr></thead><tbody>' +
+      rows.map(r => `<tr>
+        <td style="font-weight:500;font-size:13px">${escHtml(r.name)}</td>
+        <td style="font-size:12px;color:var(--text-3)">${escHtml(r.email)}</td>
+        <td style="text-align:right"><button class="btn-ghost btn-sm btn-danger" onclick="removeEnrollment(${courseId},${r.student_id})">Remover</button></td>
+      </tr>`).join('') + '</tbody></table>';
+  } catch(e) { el.innerHTML = `<div style="padding:16px;color:#ef4444">${escHtml(e.message)}</div>`; }
+}
+
+async function assignStudent() {
+  const courseId = document.getElementById('asgEnrollCourseSelect').value;
+  const email    = document.getElementById('asgStudentEmail').value.trim();
+  if(!courseId) { showToast('Seleciona uma disciplina primeiro', 'error'); return; }
+  if(!email)    { showToast('Insere o email do aluno', 'error'); return; }
+  try {
+    const users = await apiFetch('/admin/users');
+    const u = users.find(x => x.email.toLowerCase() === email.toLowerCase());
+    if(!u) { showToast('Utilizador não encontrado: ' + email, 'error'); return; }
+    await apiFetch(`/admin/courses/${courseId}/enrollments`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({student_id: u.id})
+    });
+    showToast(`${u.name} inscrito com sucesso`);
+    document.getElementById('asgStudentEmail').value = '';
+    loadAsgEnrollments();
+  } catch(e) { showToast('Erro: ' + e.message, 'error'); }
+}
+
+async function assignBulkStudents() {
+  const courseId = document.getElementById('asgEnrollCourseSelect').value;
+  const emails   = document.getElementById('asgBulkEmails').value.trim();
+  if(!courseId) { showToast('Seleciona uma disciplina primeiro', 'error'); return; }
+  if(!emails)   { showToast('Insere pelo menos um email', 'error'); return; }
+  try {
+    const res = await apiFetch(`/admin/courses/${courseId}/bulk-enroll`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({emails})
+    });
+    showToast(`Inscritos: ${res.added} | Já inscritos: ${res.skipped} | Não encontrados: ${res.not_found}`);
+    document.getElementById('asgBulkEmails').value = '';
+    loadAsgEnrollments();
+  } catch(e) { showToast('Erro: ' + e.message, 'error'); }
+}
+
+async function removeEnrollment(courseId, studentId) {
+  if(!confirm('Remover este aluno da disciplina?')) return;
+  try {
+    await apiFetch(`/admin/courses/${courseId}/enrollments/${studentId}`, {method:'DELETE'});
+    showToast('Aluno removido da disciplina');
+    loadAsgEnrollments();
+  } catch(e) { showToast('Erro: ' + e.message, 'error'); }
+}
+
+
+let _allPrograms = [];
+
+async function loadGCourses() {
+  const el = document.getElementById('gCourseList');
+  el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3)">A carregar...</div>';
+  try {
+    const progs = await apiFetch('/admin/programs');
+    _allPrograms = progs;
+    if (!progs.length) {
+      el.innerHTML = `
+        <div style="padding:32px;text-align:center;color:var(--text-3)">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".3" style="display:block;margin:0 auto 12px"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <div style="font-weight:500;margin-bottom:6px">Nenhum curso criado ainda</div>
+          <div style="font-size:12px">Cria um curso (ex: TICS, Gestão) e depois adiciona disciplinas a ele.</div>
+        </div>`;
+      return;
+    }
+    el.innerHTML = progs.map(p => `
+      <div id="prog-row-${p.id}" style="border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:default">
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(0,117,201,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:14px">${escHtml(p.name)}</div>
+            <div style="font-size:11px;color:var(--text-3);margin-top:2px">
+              <span style="background:rgba(0,117,201,.1);color:var(--accent);padding:1px 6px;border-radius:10px;font-weight:600">${p.subject_count} disciplina(s)</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn-ghost btn-sm" onclick="expandProgramSubjects(${p.id})" id="prog-expand-btn-${p.id}" title="Ver disciplinas deste curso">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              Ver Disciplinas
+            </button>
+            <button class="btn-ghost btn-sm" onclick="openProgramModal(${p.id})">Editar</button>
+            <button class="btn-ghost btn-sm btn-danger" onclick="deleteProgram(${p.id},'${escHtml(p.name)}')">Remover</button>
+          </div>
+        </div>
+        <div id="prog-subjects-${p.id}" style="display:none;background:var(--bg-2);padding:8px 16px 12px 64px;border-top:1px solid var(--border)"></div>
+      </div>`).join('');
+  } catch(e) { el.innerHTML = `<div style="padding:20px;color:#ef4444">${escHtml(e.message)}</div>`; }
+}
+
+async function expandProgramSubjects(progId) {
+  const panel = document.getElementById(`prog-subjects-${progId}`);
+  const btn   = document.getElementById(`prog-expand-btn-${progId}`);
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  if (isOpen) {
+    panel.style.display = 'none';
+    btn.style.color = '';
+    return;
+  }
+  panel.style.display = 'block';
+  btn.style.color = 'var(--accent)';
+  panel.innerHTML = '<div style="padding:8px 0;color:var(--text-3);font-size:12px">A carregar disciplinas...</div>';
+  try {
+    const subjects = await apiFetch(`/admin/programs/${progId}/subjects`);
+    if (!subjects.length) {
+      panel.innerHTML = `
+        <div style="padding:8px 0;font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:8px">
+          Nenhuma disciplina associada a este curso.
+          <button class="btn-ghost btn-sm" onclick="switchGTab(2)" style="font-size:11px">Adicionar disciplina →</button>
+        </div>`;
+      return;
+    }
+    const semMap = Object.fromEntries((_allSemesters||[]).map(s=>[s.id, s.name]));
+    panel.innerHTML = `
+      <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Disciplinas</div>
+      <table class="usage-table" style="margin:0">
+        <thead><tr><th>Código</th><th>Nome</th><th>Semestre</th><th></th></tr></thead>
+        <tbody>
+        ${subjects.map(s => `<tr>
+          <td><code style="background:var(--bg-1);padding:2px 6px;border-radius:4px;font-size:11px">${escHtml(s.code)}</code></td>
+          <td style="font-weight:500;font-size:13px">${escHtml(s.name)}</td>
+          <td style="color:var(--text-3);font-size:12px">${escHtml(semMap[s.semester_id]||s.semester||'—')}</td>
+          <td style="text-align:right;white-space:nowrap">
+            <button class="btn-ghost btn-sm" onclick="openGDisciplineModal(${s.id})">Editar</button>
+            <button class="btn-ghost btn-sm btn-danger" onclick="deleteGCourse(${s.id},'${escHtml(s.name)}')">Remover</button>
+          </td>
+        </tr>`).join('')}
+        </tbody>
+      </table>
+      <button class="btn-ghost btn-sm" onclick="switchGTab(2)" style="margin-top:8px;font-size:11px">
+        + Adicionar disciplina a este curso →
+      </button>`;
+  } catch(e) {
+    panel.innerHTML = `<div style="padding:8px 0;color:#ef4444;font-size:12px">${escHtml(e.message)}</div>`;
+  }
+}
+
+function openGCourseModal(id) { openProgramModal(id); }
+
+function openProgramModal(id) {
+  const isEdit = id != null;
+  document.getElementById('programModalTitle').textContent = isEdit ? 'Editar Curso' : 'Novo Curso';
+  document.getElementById('editProgramId').value = id || '';
+  if (isEdit) {
+    const p = _allPrograms.find(x => x.id === id);
+    if(p) document.getElementById('editProgramName').value = p.name;
+  } else {
+    document.getElementById('editProgramName').value = '';
+  }
+  document.getElementById('programModalBackdrop').style.display = '';
+  document.getElementById('programModal').style.display = '';
+  document.getElementById('editProgramName').focus();
+}
+
+function closeProgramModal() {
+  document.getElementById('programModalBackdrop').style.display = 'none';
+  document.getElementById('programModal').style.display = 'none';
+}
+
+async function saveProgram() {
+  const id = document.getElementById('editProgramId').value;
+  const name = document.getElementById('editProgramName').value.trim();
+  if(!name) { showToast('Nome é obrigatório','error'); return; }
+  try {
+    if(id) {
+      await apiFetch(`/admin/programs/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name}) });
+      showToast('Curso atualizado');
+    } else {
+      await apiFetch('/admin/programs', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name}) });
+      showToast('Curso criado');
+    }
+    closeProgramModal();
+    loadGCourses();
+  } catch(e) { showToast('Erro: '+e.message,'error'); }
+}
+
+async function deleteProgram(id, name) {
+  if(!confirm(`Eliminar o curso "${name}"? Esta ação não pode ser desfeita.`)) return;
+  try {
+    await apiFetch(`/admin/programs/${id}`, { method:'DELETE' });
+    showToast(`"${name}" eliminado`);
+    loadGCourses();
+  } catch(e) { showToast('Erro: '+e.message,'error'); }
+}
+
+async function loadGDisciplinesPage() {
+  // Populate program (parent-course) filter — always fetch fresh
+  const sel = document.getElementById('gDisciplineCourseFilter');
+  try {
+    const [progs, courses, sems] = await Promise.all([
+      apiFetch('/admin/programs').catch(()=>[]),
+      apiFetch('/admin/courses'),
+      apiFetch('/admin/semesters').catch(()=>[])
+    ]);
+    _allPrograms  = progs;
+    _allCourses   = courses;
+    _allSemesters = sems;
+    courses.forEach(c => { if(coursesMap) coursesMap[c.id] = c; });
+  } catch { _allPrograms = _allPrograms||[]; _allCourses = _allCourses||[]; _allSemesters = _allSemesters||[]; }
+  sel.innerHTML = '<option value="">Todos os programas</option>' +
+    _allPrograms.map(p=>`<option value="${p.id}">${escHtml(p.name)}</option>`).join('');
+  renderGDisciplines();
+}
+
+async function loadGDisciplines() { renderGDisciplines(); }
+
+function renderGDisciplines() {
+  const el = document.getElementById('gDisciplineList');
+  const progId = document.getElementById('gDisciplineCourseFilter').value;
+  const semMap  = Object.fromEntries((_allSemesters||[]).map(s=>[s.id, s.name]));
+  const progMap = Object.fromEntries((_allPrograms||[]).map(p=>[p.id, p.name]));
+  let filtered  = (_allCourses||[]);
+  if (progId) filtered = filtered.filter(c => String(c.program_id) === String(progId));
+
+  if (!filtered.length) {
+    el.innerHTML = `
+      <div style="padding:32px;text-align:center;color:var(--text-3)">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".3" style="display:block;margin:0 auto 10px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Nenhuma disciplina encontrada.
+        ${progId ? `<br><button class="btn-ghost btn-sm" style="margin-top:8px" onclick="document.getElementById('gDisciplineCourseFilter').value='';renderGDisciplines()">Ver todas</button>` : ''}
+      </div>`;
+    return;
+  }
+
+  // Group by parent program
+  const grouped = {};   // progId → [courses]
+  const noGroup  = [];
+  filtered.forEach(c => {
+    if (c.program_id && progMap[c.program_id]) {
+      if (!grouped[c.program_id]) grouped[c.program_id] = [];
+      grouped[c.program_id].push(c);
+    } else {
+      noGroup.push(c);
+    }
+  });
+
+  function subjectRows(list) {
+    return list.map(c => `<tr>
+      <td><code style="font-size:12px;background:var(--bg-2);padding:2px 6px;border-radius:4px">${escHtml(c.code)}</code></td>
+      <td style="font-weight:500">${escHtml(c.name)}</td>
+      <td style="color:var(--text-3);font-size:12px">${escHtml(semMap[c.semester_id]||'—')}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn-ghost btn-sm" onclick="openGDisciplineModal(${c.id})">Editar</button>
+        <button class="btn-ghost btn-sm btn-danger" onclick="deleteGCourse(${c.id},'${escHtml(c.name)}')">Remover</button>
+      </td></tr>`).join('');
+  }
+
+  let html = '';
+
+  // Render groups by course (programme)
+  Object.entries(grouped).forEach(([pid, subjects]) => {
+    html += `
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(0,117,201,.06);border-left:3px solid var(--accent)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span style="font-weight:700;font-size:13px;color:var(--accent)">${escHtml(progMap[pid])}</span>
+          <span style="margin-left:4px;font-size:11px;color:var(--text-3);background:rgba(0,117,201,.12);padding:1px 6px;border-radius:10px">${subjects.length} disciplina(s)</span>
+        </div>
+        <table class="usage-table" style="margin:0;border-radius:0">
+          <thead><tr><th>Código</th><th>Nome</th><th>Semestre</th><th></th></tr></thead>
+          <tbody>${subjectRows(subjects)}</tbody>
+        </table>
+      </div>`;
+  });
+
+  // Subjects without a parent course
+  if (noGroup.length) {
+    html += `
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--bg-2);border-left:3px solid var(--text-3)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span style="font-weight:600;font-size:13px;color:var(--text-2)">Sem curso associado</span>
+          <span style="margin-left:4px;font-size:11px;color:var(--text-3)">${noGroup.length} disciplina(s)</span>
+        </div>
+        <table class="usage-table" style="margin:0;border-radius:0">
+          <thead><tr><th>Código</th><th>Nome</th><th>Semestre</th><th></th></tr></thead>
+          <tbody>${subjectRows(noGroup)}</tbody>
+        </table>
+      </div>`;
+  }
+
+  el.innerHTML = `<div style="padding:8px 0">${html}</div>`;
+}
+
+async function loadGUsers() {
+  const tbody = document.getElementById('gUsersTableBody');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px">A carregar...</td></tr>';
+  try {
+    _gAllUsers = await apiFetch('/admin/users');
+    renderGUsers(_gAllUsers);
+  } catch(e) { tbody.innerHTML = `<tr><td colspan="6" style="color:#ef4444;padding:20px">${escHtml(e.message)}</td></tr>`; }
+}
+
+function filterGUsers() {
+  const q = document.getElementById('gUserSearch').value.toLowerCase();
+  const role = document.getElementById('gRoleFilter').value;
+  renderGUsers(_gAllUsers.filter(u=>
+    (!q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) &&
+    (!role || u.role===role)
+  ));
+}
+
+function renderGUsers(users) {
+  const tbody = document.getElementById('gUsersTableBody');
+  const RC = {student:'#7c3aed',instructor:'#3b82f6',secretaria:'#10b981',admin:'#ef4444'};
+  const RL = {student:'Aluno',instructor:'Docente',secretaria:'Secretaria',admin:'Admin'};
+  if(!users.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px">Nenhum utilizador encontrado.</td></tr>'; return; }
+  tbody.innerHTML = users.map(u=>`<tr>
+    <td>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:${RC[u.role]||'#888'}22;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:${RC[u.role]||'#888'}">${escHtml((u.name[0]||'?').toUpperCase())}</div>
+        <div><div style="font-weight:500;font-size:13px">${escHtml(u.name)}</div><div style="font-size:11px;color:var(--text-3)">${escHtml(u.email)}</div></div>
+      </div>
+    </td>
+    <td><span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:${RC[u.role]||'#888'}22;color:${RC[u.role]||'#888'}">${RL[u.role]||u.role}</span></td>
+    <td style="text-align:right;color:var(--text-3);font-size:13px">${u.enrollments}</td>
+    <td style="text-align:right;color:var(--text-3);font-size:13px">${u.total_msgs}</td>
+    <td><label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+      <input type="checkbox" ${u.is_active?'checked':''} onchange="toggleActive(${u.id},this.checked)" style="cursor:pointer"/>
+      <span style="font-size:12px;color:var(--text-3)">${u.is_active?'Ativo':'Inativo'}</span>
+    </label></td>
+    <td style="text-align:right;white-space:nowrap">
+      <button class="btn-ghost btn-sm" onclick="openUserModal(${u.id})">Editar</button>
+      <button class="btn-ghost btn-sm btn-danger" onclick="deleteUser(${u.id},'${escHtml(u.name)}')">Remover</button>
+    </td></tr>`).join('');
+}
+
+// Discipline (UC) modal for Gestão tab 2
+function openGDisciplineModal(id) { openCourseModal(id); }
+
+async function deleteGCourse(id, name) {
+  if(!confirm(`Eliminar "${name}"? Remove a UC e todo o histórico associado.`)) return;
+  try {
+    await apiFetch(`/admin/courses/${id}`,{method:'DELETE'});
+    showToast(`"${name}" eliminado`);
+    if(_gTab===1) loadGCourses();
+    if(_gTab===2) loadGDisciplines();
+  } catch(e){ showToast('Erro: '+e.message,'error'); }
+}
+
+// Enrollment quick modal from Gestão tab
+function openEnrollModal(courseId, courseName) {
+  // Switch to courses panel enrollment card
+  selectCourses();
+  setTimeout(()=>{ openEnrollCard(courseId, courseName); }, 500);
+}
+
+</script>
+
+</body>
+</html>

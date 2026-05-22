@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ISLA Santarém — Assistente Académico</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script>if(localStorage.getItem('darkMode')==='1')document.documentElement.setAttribute('data-dark','1');</script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="assets/images/islasantarem-inverse.svg" alt="ISLA Santarém" />
+      </div>
+      <div class="sidebar-tagline">Assistente Académico</div>
+      <button class="new-chat-btn" onclick="newChat()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        <span class="new-chat-btn-text">Nova Conversa</span>
+      </button>
+    </div>
+
+    <!-- Tabs: Conversas / Guardados -->
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" id="tabChats"      onclick="switchTab('chats')">Conversas</button>
+      <button class="sidebar-tab"        id="tabBookmarks"  onclick="switchTab('bookmarks')">Guardados</button>
+    </div>
+
+    <!-- Session search -->
+    <div class="sidebar-search" id="searchWrap" style="display:none">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="sessionSearch" type="text" placeholder="Pesquisar conversas..." oninput="filterSessions(this.value)" />
+    </div>
+
+    <div class="history-scroll" id="historyScroll">
+      <div id="historyList">
+        <div class="history-empty">A carregar...</div>
+      </div>
+      <div id="bookmarkList" style="display:none"></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <!-- Secretaria link -->
+      <div style="padding: 8px 12px; border-bottom: 1px solid var(--border, #e2e4e9);">
+        <a href="/secretaria.html" style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted,#666);text-decoration:none;padding:6px 8px;border-radius:8px;transition:background .15s;" onmouseover="this.style.background='var(--bg-elevated,#f0f2f5)'" onmouseout="this.style.background='transparent'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          </svg>
+          Secretaria Virtual
+        </a>
+      </div>
+      <div class="user-profile">
+        <div class="avatar" id="userAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">...</div>
+          <div class="user-role" id="userRole">Estudante</div>
+        </div>
+        <button onclick="logout()" title="Terminar sessão" class="logout-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+
+      <!-- LEFT: hamburger + logo + active-course badge -->
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/>
+          </svg>
+        </button>
+        <div class="topbar-brand">
+          <img src="assets/images/islasantarem.svg" alt="ISLA" class="topbar-logo" />
+        </div>
+        <div class="active-course-badge" id="activeBadge">
+          <span class="badge-dot"></span>
+          <span id="activeCourseLabel">Seleciona uma UC</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: grouped action buttons -->
+      <div class="topbar-right">
+
+        <!-- GROUP 1: UC selector -->
+        <div class="course-selector-wrap">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="course-selector-icon">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          <select class="topbar-select" id="courseSelector" onchange="changeCourse(this)">
+            <option value="">A carregar UCs...</option>
+          </select>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="select-chevron">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </div>
+
+        <div class="topbar-sep"></div>
+
+        <!-- GROUP 2: Search + Stop -->
+        <button class="topbar-btn" id="searchBtn" onclick="openSearch()" title="Pesquisar nas conversas (Ctrl+F)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span class="topbar-btn-label">Pesquisar</span>
+        </button>
+
+        <button class="stop-btn" id="stopBtn" onclick="stopGeneration()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+          </svg>
+          Parar
+        </button>
+
+        <div class="topbar-sep"></div>
+
+        <!-- GROUP 3: Language + Settings -->
+        <button class="topbar-btn" id="langBtn" onclick="toggleLang()" title="Idioma da resposta">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          <span id="langLabel">PT</span>
+        </button>
+
+        <button class="topbar-btn" id="settingsBtn" onclick="toggleSettings(event)" title="Definições rápidas (tema, tamanho)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+
+        <!-- GROUP 4: "More" dropdown (export, summarise, clear) -->
+        <button class="topbar-more-btn" id="moreBtn" onclick="toggleMore(event)" title="Mais acções">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+          </svg>
+        </button>
+
+        <!-- More dropdown panel -->
+        <div class="topbar-more-panel" id="morePanel">
+          <button class="topbar-more-item" id="exportItem" onclick="exportSession(); closeMore()" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Exportar conversa
+          </button>
+          <button class="topbar-more-item" id="summaryItem" onclick="summariseSession(); closeMore()" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/>
+              <line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/>
+            </svg>
+            Resumir conversa
+          </button>
+          <button class="topbar-more-item" onclick="clearChat(); closeMore()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 12.142A2 2 0 0 1 16.138 20H7.862a2 2 0 0 1-1.995-1.858L5 6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+            Limpar ecrã
+          </button>
+        </div>
+
+        <!-- Admin link (role-gated) -->
+        <a href="admin.html" class="topbar-btn" id="adminLink" title="Painel de Gestão" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <span>Admin</span>
+        </a>
+        <!-- Instructor portal link (role-gated) -->
+        <a href="instructor.html" class="topbar-btn" id="instructorLink" title="Portal do Docente" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          <span>Docente</span>
+        </a>
+
+      </div>
+    </header>
+
+    <!-- Quick settings panel -->
+    <div class="settings-panel" id="settingsPanel">
+      <div class="settings-row">
+        <span class="settings-label">Modo escuro</span>
+        <label class="toggle">
+          <input type="checkbox" id="darkToggle" onchange="setDarkMode(this.checked)" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Tamanho da letra</span>
+        <select id="fontSizeSelect" onchange="setFontSize(this.value)"
+          style="font-size:11px;border:1px solid var(--bot-border);border-radius:4px;padding:2px 6px;background:var(--card-bg);color:var(--text-1)">
+          <option value="sm">Pequena</option>
+          <option value="md" selected>Normal</option>
+          <option value="lg">Grande</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Chat area -->
+    <div class="chat-area" id="chatArea">
+      <div class="chat-inner" id="chatInner">
+
+        <!-- Welcome screen -->
+        <div class="welcome" id="welcomeScreen">
+          <div class="welcome-gemini-header">
+            <h1 class="welcome-gemini-title">
+              <span class="gemini-greeting">Olá, </span><span id="welcomeTitleName" class="gemini-name"></span>
+            </h1>
+            <h2 class="welcome-gemini-subtitle">Como posso ajudar-te hoje?</h2>
+          </div>
+          <div class="welcome-chips">
+            <div class="chip" onclick="sendQuick('Quando são os exames finais?')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              Quando são os exames finais?
+            </div>
+            <div class="chip" onclick="sendQuick('Quais são os critérios de avaliação?')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
+              Critérios de avaliação
+            </div>
+            <div class="chip" onclick="sendQuick('Resume os conteúdos principais da UC.')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+              Conteúdos principais da UC
+            </div>
+            <div class="chip" onclick="sendQuick('Qual é o docente responsável?')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+              Docente responsável
+            </div>
+            <div class="chip" onclick="sendQuick('Quantos ECTS tem esta UC?')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              Quantos ECTS tem esta UC?
+            </div>
+            <div class="chip" onclick="sendQuick('Como me candidato a uma bolsa de estudo?')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+              Bolsas de estudo
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="input-area">
+      <div class="input-inner">
+
+        <!-- Attachment preview strip -->
+        <div id="attachPreview" class="attach-preview" style="display:none">
+          <div class="attach-preview-inner">
+            <div id="attachIcon" class="attach-preview-icon">
+              <!-- pdf or image icon injected by JS -->
+            </div>
+            <div class="attach-preview-info">
+              <div class="attach-preview-name" id="attachName">ficheiro.pdf</div>
+              <div class="attach-preview-status" id="attachStatus">A processar...</div>
+            </div>
+            <button class="attach-preview-remove" onclick="removeAttachment()" title="Remover">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="input-box" id="inputBox">
+          <div class="input-mode-tag" id="modeTag" style="display:none" onclick="toggleModeTag()" title="Clica para alternar"></div>
+          <textarea
+            id="msgInput"
+            placeholder="Faz uma pergunta..."
+            rows="1"
+            onkeydown="handleKey(event)"
+            oninput="autoResize(this)"
+          ></textarea>
+
+          <!-- Action buttons row -->
+          <div class="input-actions">
+            <!-- Mic button -->
+            <button class="input-action-btn mic-btn" id="micBtn" onclick="toggleVoice()" title="Entrada de voz" aria-label="Microfone">
+              <svg class="mic-icon-default" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+              <svg class="mic-icon-stop" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+                <rect x="6" y="6" width="12" height="12" rx="2"/>
+              </svg>
+            </button>
+
+            <!-- Attach button -->
+            <button class="input-action-btn attach-btn" id="attachBtn" onclick="document.getElementById('attachInput').click()" title="Anexar PDF ou imagem" aria-label="Anexar ficheiro">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </button>
+            <input id="attachInput" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" style="display:none" onchange="handleAttachment(event)" />
+
+            <!-- Send button -->
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled aria-label="Enviar">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="input-hint">
+          <span>Suporta voz&nbsp;🎤, PDF e imagens&nbsp;📎</span>
+          &nbsp;·&nbsp;
+          O assistente pode cometer erros. Confirma sempre com a secretaria ou os docentes.
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── Search modal ── -->
+<div class="search-modal" id="searchModal" style="display:none" onclick="closeSearch(event)">
+  <div class="search-modal-inner" onclick="event.stopPropagation()">
+    <div class="search-modal-header">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="searchModalInput" class="search-modal-input" placeholder="Pesquisar nas minhas conversas..."
+        oninput="runSearch(this.value)" onkeydown="if(event.key==='Escape')closeSearch()" />
+      <button onclick="closeSearch()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:16px;line-height:1;padding:0 2px">✕</button>
+    </div>
+    <div id="searchResults" class="search-results">
+      <div class="search-empty">Escreve para pesquisar nas tuas conversas.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Summary modal ── -->
+<div class="summary-modal" id="summaryModal" style="display:none" onclick="closeSummary(event)">
+  <div class="summary-modal-inner" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h3 style="font-size:15px;font-weight:600;color:var(--text-1)">Resumo da conversa</h3>
+      <button onclick="closeSummary()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:18px;line-height:1">✕</button>
+    </div>
+    <div id="summaryContent" style="font-size:13px;color:var(--text-2);line-height:1.75">
+      <div style="text-align:center;padding:20px 0;color:var(--text-3)">A gerar resumo...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Onboarding overlay (hidden by default, shown on first login) -->
+<div class="onboarding-overlay" id="onboardingOverlay" style="display:none" onclick="closeOnboarding(event)">
+  <div class="onboarding-card" onclick="event.stopPropagation()">
+    <div style="font-size:36px;margin-bottom:12px">👋</div>
+    <h2>Bem-vindo ao ISLA Assistente!</h2>
+    <p>O teu assistente académico com IA. Podes perguntar sobre conteúdos, regulamentos, avaliações e muito mais.</p>
+    <div class="onboarding-steps">
+      <div class="onboarding-step">
+        <div class="onboarding-step-num">1</div>
+        <span>Seleciona a <strong>Unidade Curricular</strong> no menu superior.</span>
+      </div>
+      <div class="onboarding-step">
+        <div class="onboarding-step-num">2</div>
+        <span>Escreve a tua pergunta e prime <strong>Enter</strong> para enviar.</span>
+      </div>
+      <div class="onboarding-step">
+        <div class="onboarding-step-num">3</div>
+        <span>Guarda respostas úteis com o ícone <strong>🔖</strong> e acede em <em>Guardados</em>.</span>
+      </div>
+      <div class="onboarding-step">
+        <div class="onboarding-step-num">4</div>
+        <span>Usa <strong>Ctrl+K</strong> para focar o campo de texto a qualquer momento.</span>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="closeOnboarding()" style="width:100%;justify-content:center">
+      Começar a usar
+    </button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+<script src="assets/js/chat.js?v=5"></script>
+<script src="assets/js/jobs.js"></script>
+</body>
+</html>

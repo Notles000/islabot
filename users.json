@@ -1,0 +1,8 @@
+[
+  {
+    "name": "Administrador",
+    "email": "admin@islasantarem.pt",
+    "password": "admin1234",
+    "role": "admin"
+  }
+]
