@@ -1,5 +1,23 @@
 import logging
 import re
+import os
+import shutil
+
+# --- Vercel Read-Only Filesystem Fix ---
+if os.environ.get("VERCEL"):
+    if not os.path.exists("/tmp/data"):
+        if os.path.exists("data"):
+            shutil.copytree("data", "/tmp/data")
+        elif os.path.exists("../data"): # Depending on working directory
+            shutil.copytree("../data", "/tmp/data")
+        else:
+            os.makedirs("/tmp/data", exist_ok=True)
+    
+    os.environ["DATABASE_URL"] = "sqlite:////tmp/data/isla_chatbot.db"
+    os.environ["DOCS_PATH"] = "/tmp/data/courses"
+    os.environ["LLM_PROVIDER"] = "openrouter"
+# ---------------------------------------
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
