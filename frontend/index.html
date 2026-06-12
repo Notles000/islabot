@@ -5,8 +5,212 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ISLA Santarém — Assistente Académico</title>
   <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    /* ── Demo credentials box ── */
+    .demo-creds {
+      background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+      border: 1px solid #c7d7fa;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-size: 0.82rem;
+      color: #374151;
+    }
+    .demo-creds-title {
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #4f6ef7;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .demo-creds-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .demo-creds-row:last-child { margin-bottom: 0; }
+    .demo-label {
+      width: 60px;
+      font-weight: 600;
+      color: #6b7280;
+      flex-shrink: 0;
+    }
+    .demo-val {
+      font-family: 'Courier New', monospace;
+      background: #fff;
+      border: 1px solid #dbe4ff;
+      border-radius: 5px;
+      padding: 2px 7px;
+      color: #1e293b;
+      font-size: 0.81rem;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+      position: relative;
+    }
+    .demo-val:hover { background: #e8f0fe; border-color: #4f6ef7; }
+    .demo-fill-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #4f6ef7;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background .15s;
+      margin-left: auto;
+    }
+    .demo-fill-btn:hover { background: #dbe4ff; }
+
+    /* ── GDPR popup ── */
+    .gdpr-link {
+      color: #4f6ef7;
+      cursor: pointer;
+      text-decoration: underline;
+      font-weight: 500;
+    }
+    .gdpr-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(3px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .gdpr-backdrop.open { display: flex; }
+    .gdpr-modal {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 60px rgba(0,0,0,.18);
+      animation: gdprIn .25s ease;
+    }
+    @keyframes gdprIn {
+      from { transform: scale(.94) translateY(12px); opacity: 0; }
+      to   { transform: scale(1)   translateY(0);    opacity: 1; }
+    }
+    .gdpr-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      z-index: 1;
+    }
+    .gdpr-modal-header h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111;
+      margin: 0;
+    }
+    .gdpr-close {
+      background: #f3f4f6;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      font-size: 16px;
+      transition: background .15s;
+    }
+    .gdpr-close:hover { background: #e5e7eb; color: #111; }
+    .gdpr-modal-body {
+      padding: 16px 20px 20px;
+      font-size: 0.85rem;
+      color: #374151;
+      line-height: 1.65;
+    }
+    .gdpr-modal-body p { margin: 0 0 10px; }
+    .gdpr-modal-body ul { margin: 6px 0 10px 16px; padding: 0; }
+    .gdpr-modal-body li { margin-bottom: 4px; }
+    .gdpr-modal-body strong { color: #111; }
+    .gdpr-modal-footer {
+      padding: 12px 20px 18px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .gdpr-accept-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #4f6ef7, #7c5bf7);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 11px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .gdpr-accept-btn:hover { opacity: .9; }
+
+    /* consent row inside form */
+    .consent-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      font-size: 0.82rem;
+      color: #374151;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+    .consent-row input[type=checkbox] {
+      margin-top: 2px;
+      flex-shrink: 0;
+      width: 15px;
+      height: 15px;
+      accent-color: #4f6ef7;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body class="login-body">
+
+<!-- ── GDPR popup ── -->
+<div class="gdpr-backdrop" id="gdprBackdrop" onclick="closeGdpr(event)">
+  <div class="gdpr-modal" onclick="event.stopPropagation()">
+    <div class="gdpr-modal-header">
+      <h3>🛡️ Proteção de Dados Pessoais (RGPD)</h3>
+      <button class="gdpr-close" onclick="closeGdpr()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="gdpr-modal-body">
+      <p><strong>Responsável pelo tratamento:</strong> ISLA Santarém — Instituto Superior de Línguas e Administração de Santarém.</p>
+      <p><strong>Finalidade:</strong> Os dados recolhidos durante este teste (nome, email e conversas) são utilizados exclusivamente para fins de avaliação, melhoria e validação da aplicação ISLA Assistente Académico.</p>
+      <p><strong>Base legal:</strong> Consentimento do titular dos dados (Art.º 6.º, n.º 1, al. a) do RGPD).</p>
+      <p><strong>Os teus direitos incluem:</strong></p>
+      <ul>
+        <li>Acesso aos teus dados pessoais</li>
+        <li>Retificação de dados incorretos</li>
+        <li>Eliminação dos dados ("direito ao esquecimento")</li>
+        <li>Portabilidade dos dados</li>
+        <li>Retirada do consentimento a qualquer momento</li>
+      </ul>
+      <p><strong>Conservação:</strong> Os dados serão conservados durante o período de avaliação do projeto e eliminados após a sua conclusão.</p>
+      <p><strong>Confidencialidade:</strong> Os dados tratados de forma confidencial e não serão partilhados com terceiros.</p>
+      <p>Para exercer os teus direitos ou obter esclarecimentos, contacta o responsável pelo projeto académico.</p>
+    </div>
+    <div class="gdpr-modal-footer">
+      <button class="gdpr-accept-btn" onclick="acceptGdpr()">Compreendi e Aceito</button>
+    </div>
+  </div>
+</div>
 
 <div class="login-layout">
 
@@ -63,6 +267,24 @@
         <p>Entra com as tuas credenciais institucionais</p>
       </div>
 
+      <!-- Demo credentials box -->
+      <div class="demo-creds">
+        <div class="demo-creds-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>
+          Credenciais de demonstração
+        </div>
+        <div class="demo-creds-row">
+          <span class="demo-label">Email</span>
+          <span class="demo-val" onclick="fillEmail()" title="Clica para preencher">admin@islasantarem.pt</span>
+          <button class="demo-fill-btn" onclick="fillEmail()">Usar</button>
+        </div>
+        <div class="demo-creds-row">
+          <span class="demo-label">Password</span>
+          <span class="demo-val" onclick="fillPass()" title="Clica para preencher">admin1234</span>
+          <button class="demo-fill-btn" onclick="fillPass()">Usar</button>
+        </div>
+      </div>
+
       <form onsubmit="doLogin(event)" class="login-form">
         <div class="form-group">
           <label for="email">
@@ -71,7 +293,7 @@
             </svg>
             Email institucional
           </label>
-          <input type="email" id="email" placeholder="joao.silva@alunos.islasantarem.pt" autocomplete="email" required />
+          <input type="email" id="email" placeholder="admin@islasantarem.pt" autocomplete="email" required />
         </div>
 
         <div class="form-group">
@@ -91,17 +313,13 @@
           </div>
         </div>
 
-        <div class="consent-container" style="font-size: 0.85rem; margin-bottom: 15px; border: 1px solid #ddd; padding: 12px; border-radius: 6px; background-color: #f9f9f9; color: #444; text-align: left;">
-          <h4 style="margin-top: 0; margin-bottom: 8px; font-size: 0.9rem; color: #222;">CONSENTIMENTO PARA TRATAMENTO DE DADOS PESSOAIS</h4>
-          <p style="margin: 0 0 8px 0; line-height: 1.4;">Os dados recolhidos durante este teste serão utilizados exclusivamente para fins de avaliação, melhoria e validação da aplicação. Os dados serão tratados de forma confidencial e não serão partilhados com terceiros sem autorização. A participação é voluntária e o participante pode solicitar a eliminação dos seus dados a qualquer momento, nos termos do Regulamento Geral sobre a Proteção de Dados (RGPD).</p>
-          <p style="margin: 0 0 10px 0; line-height: 1.4;">Para esclarecimentos, entre em contato:<br>
-          • Responsável pelo tratamento dos dados: [Nome do Responsável]<br>
-          • Contacto que exerce direitos de acesso, retificação ou eliminação dos dados: [Email de Contacto]<br>
-          • Os dados serão conservados até [Data/Período].</p>
-          
-          <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-weight: 500; color: #111;">
-            <input type="checkbox" id="consentCheckbox" required style="margin-top: 3px;" />
-            <span style="line-height: 1.3;">Declaro que li a informação acima e autorizo o tratamento dos meus dados para os fins indicados.</span>
+        <!-- Consent row with GDPR popup link -->
+        <div class="consent-row">
+          <input type="checkbox" id="consentCheckbox" required />
+          <label for="consentCheckbox">
+            Declaro que li e aceito a
+            <span class="gdpr-link" onclick="openGdpr()">Política de Proteção de Dados (RGPD)</span>
+            e autorizo o tratamento dos meus dados para os fins indicados.
           </label>
         </div>
 
@@ -128,6 +346,31 @@
 </div>
 
 <script>
+/* ── GDPR popup ── */
+function openGdpr() {
+  document.getElementById('gdprBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeGdpr(e) {
+  if (e && e.target !== document.getElementById('gdprBackdrop')) return;
+  document.getElementById('gdprBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function acceptGdpr() {
+  document.getElementById('consentCheckbox').checked = true;
+  document.getElementById('gdprBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ── Demo credential fill ── */
+function fillEmail() {
+  document.getElementById('email').value = 'admin@islasantarem.pt';
+}
+function fillPass() {
+  document.getElementById('password').value = 'admin1234';
+}
+
+/* ── Login ── */
 async function doLogin(e) {
   e.preventDefault();
   const btn     = document.getElementById('loginBtn');
