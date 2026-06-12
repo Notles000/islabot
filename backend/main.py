@@ -3,21 +3,14 @@ import re
 import os
 import shutil
 
-# --- Vercel Read-Only Filesystem Fix ---
+# --- Vercel: ensure writable data directory in /tmp ---
 if os.environ.get("VERCEL"):
-    if not os.path.exists("/tmp/data"):
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        data_src = os.path.join(base_dir, "data")
-        if os.path.exists(data_src):
-            shutil.copytree(data_src, "/tmp/data")
-        else:
-            os.makedirs("/tmp/data", exist_ok=True)
-            print("WARNING: data_src not found at", data_src)
-    
+    os.makedirs("/tmp/data/courses", exist_ok=True)
     os.environ["DATABASE_URL"] = "sqlite:////tmp/data/isla_chatbot.db"
-    os.environ["DOCS_PATH"] = "/tmp/data/courses"
+    os.environ["DOCS_PATH"]    = "/tmp/data/courses"
     os.environ["LLM_PROVIDER"] = "openrouter"
-# ---------------------------------------
+# -------------------------------------------------------
+
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -114,6 +107,7 @@ def _scheduled_feed_fetch():
 @app.on_event("startup")
 def startup():
     init_db()
+    _seed_default_admin()
 
     import threading
     threading.Thread(target=warmup_llm, daemon=True).start()
@@ -133,3 +127,51 @@ def startup():
 
     threading.Thread(target=_feed_scheduler, daemon=True, name="feed-scheduler").start()
     logger.info("Live feed scheduler started — runs daily at 08:00.")
+
+
+def _seed_default_admin():
+    """Create the admin user on first boot if it doesn't exist (needed on Vercel)."""
+    from .database import SessionLocal
+    from .models import User, UserRole, Semester, Course
+    from .auth import hash_password
+    from datetime import date
+
+    db = SessionLocal()
+    try:
+        admin_email    = os.environ.get("ADMIN_EMAIL",    "admin@islasantarem.pt")
+        admin_password = os.environ.get("ADMIN_PASSWORD", "admin1234")
+        admin_name     = os.environ.get("ADMIN_NAME",     "Administrador")
+
+        if not db.query(User).filter(User.email == admin_email).first():
+            db.add(User(
+                name=admin_name,
+                email=admin_email,
+                password_hash=hash_password(admin_password),
+                role=UserRole.admin,
+                is_active=True,
+            ))
+            db.commit()
+            logger.info("Auto-seeded admin user: %s", admin_email)
+
+        # Seed semesters and courses if empty
+        if not db.query(Semester).first():
+            sem2 = Semester(
+                name="2025/26 — 2.º Semestre",
+                start_date=date(2026, 2, 16),
+                end_date=date(2026, 7, 31),
+                is_active=True,
+            )
+            db.add(sem2)
+            db.flush()
+            for code, name, short in [
+                ("ESIA", "Engenharia de Software para IA", "ESIA"),
+                ("EST",  "Estatística",                   "EST"),
+            ]:
+                db.add(Course(semester_id=sem2.id, code=code, name=name, short_name=short))
+            db.commit()
+            logger.info("Auto-seeded default semester and courses.")
+    except Exception as exc:
+        logger.error("Seed error: %s", exc)
+    finally:
+        db.close()
+
