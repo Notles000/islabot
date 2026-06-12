@@ -6,12 +6,13 @@ import shutil
 # --- Vercel Read-Only Filesystem Fix ---
 if os.environ.get("VERCEL"):
     if not os.path.exists("/tmp/data"):
-        if os.path.exists("data"):
-            shutil.copytree("data", "/tmp/data")
-        elif os.path.exists("../data"): # Depending on working directory
-            shutil.copytree("../data", "/tmp/data")
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        data_src = os.path.join(base_dir, "data")
+        if os.path.exists(data_src):
+            shutil.copytree(data_src, "/tmp/data")
         else:
             os.makedirs("/tmp/data", exist_ok=True)
+            print("WARNING: data_src not found at", data_src)
     
     os.environ["DATABASE_URL"] = "sqlite:////tmp/data/isla_chatbot.db"
     os.environ["DOCS_PATH"] = "/tmp/data/courses"
